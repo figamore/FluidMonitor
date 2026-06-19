@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 #include "../AppState.h"
+#include "../BatteryMonitor.h"
 #include "ActionsView.h"
 #include "JogView.h"
 #include "SettingsView.h"
@@ -65,6 +66,69 @@ void onMenu(lv_event_t*) {
   }
 }
 
+lv_obj_t* battery_indicator = nullptr;
+lv_obj_t* battery_fill = nullptr;
+lv_obj_t* battery_charge = nullptr;
+
+lv_color_t batteryColor(int level) {
+  if (level >= 50) {
+    return lv_color_hex(0x22C55E);
+  }
+  if (level >= 25) {
+    return lv_color_hex(0xFACC15);
+  }
+  return lv_color_hex(0xEF4444);
+}
+
+void updateBatteryTimer(lv_timer_t*) {
+  updateBatteryIndicator();
+}
+
+void createBatteryIndicator(lv_obj_t* parent) {
+  if (!batteryAvailable()) {
+    return;
+  }
+
+  battery_indicator = lv_obj_create(parent);
+  lv_obj_remove_style_all(battery_indicator);
+  lv_obj_set_size(battery_indicator, 28, 18);
+  lv_obj_clear_flag(battery_indicator, LV_OBJ_FLAG_SCROLLABLE);
+
+  lv_obj_t* body = lv_obj_create(battery_indicator);
+  lv_obj_remove_style_all(body);
+  lv_obj_set_size(body, 20, 13);
+  lv_obj_align(body, LV_ALIGN_LEFT_MID, 0, 0);
+  lv_obj_set_style_border_width(body, 1, LV_PART_MAIN);
+  lv_obj_set_style_border_color(body, lv_color_hex(0xF8FAFC), LV_PART_MAIN);
+  lv_obj_set_style_bg_opa(body, LV_OPA_TRANSP, LV_PART_MAIN);
+  lv_obj_clear_flag(body, LV_OBJ_FLAG_SCROLLABLE);
+
+  battery_fill = lv_obj_create(body);
+  lv_obj_remove_style_all(battery_fill);
+  lv_obj_set_size(battery_fill, 2, 11);
+  lv_obj_align(battery_fill, LV_ALIGN_TOP_LEFT, 1, 1);
+  lv_obj_set_style_bg_opa(battery_fill, LV_OPA_COVER, LV_PART_MAIN);
+  lv_obj_set_style_bg_color(battery_fill, lv_color_hex(0xEF4444), LV_PART_MAIN);
+  lv_obj_clear_flag(battery_fill, LV_OBJ_FLAG_SCROLLABLE);
+
+  lv_obj_t* nub = lv_obj_create(battery_indicator);
+  lv_obj_remove_style_all(nub);
+  lv_obj_set_size(nub, 4, 7);
+  lv_obj_align(nub, LV_ALIGN_LEFT_MID, 20, 0);
+  lv_obj_set_style_bg_opa(nub, LV_OPA_COVER, LV_PART_MAIN);
+  lv_obj_set_style_bg_color(nub, lv_color_hex(0xF8FAFC), LV_PART_MAIN);
+  lv_obj_clear_flag(nub, LV_OBJ_FLAG_SCROLLABLE);
+
+  battery_charge = lv_label_create(battery_indicator);
+  lv_label_set_text(battery_charge, LV_SYMBOL_CHARGE);
+  lv_obj_set_style_text_font(battery_charge, &lv_font_montserrat_12, LV_PART_MAIN);
+  lv_obj_set_style_text_color(battery_charge, lv_color_hex(0x22C55E), LV_PART_MAIN);
+  lv_obj_align(battery_charge, LV_ALIGN_CENTER, -2, 0);
+
+  updateBatteryIndicator();
+  lv_timer_create(updateBatteryTimer, 1000, nullptr);
+}
+
 }  // namespace
 
 void setStatus(lv_color_t color) {
@@ -80,6 +144,39 @@ void formatAxis(lv_obj_t* label, const char* axis, float value) {
   char text[28];
   snprintf(text, sizeof(text), "%s %9.3f", axis, value);
   lv_label_set_text(label, text);
+}
+
+void updateBatteryIndicator() {
+  if (!battery_indicator || !battery_fill || !battery_charge) {
+    return;
+  }
+
+  int level = batteryLevel();
+  if (level < 0) {
+    lv_obj_add_flag(battery_indicator, LV_OBJ_FLAG_HIDDEN);
+    return;
+  }
+
+  lv_obj_clear_flag(battery_indicator, LV_OBJ_FLAG_HIDDEN);
+
+  int fill_w = 2;
+  if (level >= 75) {
+    fill_w = 18;
+  } else if (level >= 50) {
+    fill_w = 9;
+  } else if (level >= 25) {
+    fill_w = 4;
+  }
+
+  bool charging = batteryCharging();
+  lv_obj_set_width(battery_fill, fill_w);
+  lv_obj_set_style_bg_color(battery_fill, charging ? lv_color_hex(0x080B0F) : batteryColor(level), LV_PART_MAIN);
+
+  if (charging) {
+    lv_obj_clear_flag(battery_charge, LV_OBJ_FLAG_HIDDEN);
+  } else {
+    lv_obj_add_flag(battery_charge, LV_OBJ_FLAG_HIDDEN);
+  }
 }
 
 lv_obj_t* makePanel(lv_obj_t* parent) {
@@ -133,7 +230,7 @@ void createUi() {
 
   lv_obj_t* right = lv_obj_create(topbar);
   lv_obj_remove_style_all(right);
-  lv_obj_set_size(right, 124, 34);
+  lv_obj_set_size(right, batteryAvailable() ? 164 : 124, 34);
   lv_obj_set_flex_flow(right, LV_FLEX_FLOW_ROW);
   lv_obj_set_flex_align(right, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
   lv_obj_set_style_pad_column(right, 10, LV_PART_MAIN);
@@ -153,6 +250,8 @@ void createUi() {
   lv_obj_t* menu_label = lv_label_create(menu);
   lv_label_set_text(menu_label, "Settings");
   lv_obj_center(menu_label);
+
+  createBatteryIndicator(right);
 
   lv_obj_t* tabs = lv_tabview_create(root, LV_DIR_TOP, 30);
   lv_obj_set_size(tabs, LV_PCT(100), kScreenHeight - 42);

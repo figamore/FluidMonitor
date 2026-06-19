@@ -7,6 +7,7 @@
 
 void createUi();
 void applyDro();
+void updateBatteryIndicator();
 void setStatus(lv_color_t color);
 void formatAxis(lv_obj_t* label, const char* axis, float value);
 lv_obj_t* makePanel(lv_obj_t* parent);

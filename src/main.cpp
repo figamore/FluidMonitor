@@ -5,6 +5,7 @@
 #include <WiFi.h>
 #include <lvgl.h>
 
+#include "BatteryMonitor.h"
 #include "Display.h"
 #include "EspNowLinkClient.h"
 #include "ui/Ui.h"
@@ -15,6 +16,7 @@ void setup() {
   WiFi.mode(WIFI_STA);
   WiFi.setSleep(false);
   initDisplay();
+  initBatteryMonitor();
   createUi();
   initSecureLink();
 }
