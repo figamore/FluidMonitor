@@ -13,6 +13,7 @@
 void setup() {
   Serial.begin(115200);
   delay(100);
+  initShutdownControl();
   WiFi.mode(WIFI_STA);
   WiFi.setSleep(false);
   initDisplay();

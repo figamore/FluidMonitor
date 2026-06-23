@@ -5,7 +5,9 @@
 
 #include <lvgl.h>
 
+void initShutdownControl();
 void createUi();
+void onShutdown(lv_event_t* event);
 void applyDro();
 void updateBatteryIndicator();
 void setStatus(lv_color_t color);

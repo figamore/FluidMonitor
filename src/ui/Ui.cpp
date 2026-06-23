@@ -14,6 +14,111 @@
 
 namespace {
 
+#if FLUIDMONITOR_ENABLE_SHUTDOWN
+constexpr uint8_t kShutdownCountdownSteps = 10;
+
+lv_obj_t* shutdown_overlay = nullptr;
+lv_obj_t* shutdown_countdown_label = nullptr;
+lv_timer_t* shutdown_timer = nullptr;
+uint32_t shutdown_started_ms = 0;
+
+void releaseShutdownKey() {
+  pinMode(FLUIDMONITOR_SHUTDOWN_GPIO, INPUT);
+}
+
+void holdShutdownKey() {
+  digitalWrite(FLUIDMONITOR_SHUTDOWN_GPIO, LOW);
+  pinMode(FLUIDMONITOR_SHUTDOWN_GPIO, OUTPUT_OPEN_DRAIN);
+}
+
+void closeShutdownOverlay() {
+  if (shutdown_timer) {
+    lv_timer_del(shutdown_timer);
+    shutdown_timer = nullptr;
+  }
+  if (shutdown_overlay) {
+    lv_obj_del(shutdown_overlay);
+    shutdown_overlay = nullptr;
+  }
+  shutdown_countdown_label = nullptr;
+}
+
+void abortShutdown(lv_event_t*) {
+  releaseShutdownKey();
+  closeShutdownOverlay();
+}
+
+void updateShutdownCountdown(lv_timer_t*) {
+  if (!shutdown_countdown_label) {
+    return;
+  }
+
+  const uint32_t elapsed_ms = millis() - shutdown_started_ms;
+  const uint32_t step_ms = FLUIDMONITOR_SHUTDOWN_HOLD_MS / kShutdownCountdownSteps;
+  if (elapsed_ms < FLUIDMONITOR_SHUTDOWN_HOLD_MS) {
+    uint8_t count = (FLUIDMONITOR_SHUTDOWN_HOLD_MS - elapsed_ms + step_ms - 1) / step_ms;
+    if (count > kShutdownCountdownSteps) {
+      count = kShutdownCountdownSteps;
+    }
+    if (count < 1) {
+      count = 1;
+    }
+    lv_label_set_text_fmt(shutdown_countdown_label, "%u", count);
+    return;
+  }
+
+  lv_label_set_text(shutdown_countdown_label, "...");
+}
+
+void startShutdownUi() {
+  if (shutdown_overlay) {
+    return;
+  }
+
+  shutdown_started_ms = millis();
+  holdShutdownKey();
+
+  if (menu_panel) {
+    lv_obj_add_flag(menu_panel, LV_OBJ_FLAG_HIDDEN);
+  }
+
+  shutdown_overlay = lv_obj_create(lv_scr_act());
+  lv_obj_add_style(shutdown_overlay, &style_overlay, LV_PART_MAIN);
+  lv_obj_set_size(shutdown_overlay, 250, 176);
+  lv_obj_align(shutdown_overlay, LV_ALIGN_CENTER, 0, 0);
+  lv_obj_set_flex_flow(shutdown_overlay, LV_FLEX_FLOW_COLUMN);
+  lv_obj_set_flex_align(shutdown_overlay, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+  lv_obj_set_style_pad_row(shutdown_overlay, 12, LV_PART_MAIN);
+  lv_obj_set_scrollbar_mode(shutdown_overlay, LV_SCROLLBAR_MODE_OFF);
+  lv_obj_clear_flag(shutdown_overlay, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_move_foreground(shutdown_overlay);
+
+  lv_obj_t* title = lv_label_create(shutdown_overlay);
+  lv_label_set_text(title, "Shutting down");
+  lv_obj_set_style_text_color(title, lv_color_hex(0x38BDF8), LV_PART_MAIN);
+  lv_obj_set_style_text_font(title, &lv_font_montserrat_18, LV_PART_MAIN);
+
+  shutdown_countdown_label = lv_label_create(shutdown_overlay);
+  lv_label_set_text(shutdown_countdown_label, "10");
+  lv_obj_set_style_text_color(shutdown_countdown_label, lv_color_hex(0xF8FAFC), LV_PART_MAIN);
+  lv_obj_set_style_text_font(shutdown_countdown_label, &lv_font_montserrat_32, LV_PART_MAIN);
+  lv_obj_set_style_text_align(shutdown_countdown_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+  lv_obj_set_size(shutdown_countdown_label, LV_PCT(100), 42);
+
+  lv_obj_t* abort = lv_btn_create(shutdown_overlay);
+  lv_obj_add_style(abort, &style_button, LV_PART_MAIN);
+  lv_obj_set_size(abort, 120, 40);
+  lv_obj_add_event_cb(abort, abortShutdown, LV_EVENT_CLICKED, nullptr);
+
+  lv_obj_t* abort_label = lv_label_create(abort);
+  lv_label_set_text(abort_label, "Abort");
+  lv_obj_center(abort_label);
+
+  shutdown_timer = lv_timer_create(updateShutdownCountdown, 100, nullptr);
+  updateShutdownCountdown(nullptr);
+}
+#endif
+
 void initStyles() {
   lv_style_init(&style_screen);
   lv_style_set_bg_color(&style_screen, lv_color_hex(0x080B0F));
@@ -130,6 +235,18 @@ void createBatteryIndicator(lv_obj_t* parent) {
 }
 
 }  // namespace
+
+void initShutdownControl() {
+#if FLUIDMONITOR_ENABLE_SHUTDOWN
+  releaseShutdownKey();
+#endif
+}
+
+void onShutdown(lv_event_t*) {
+#if FLUIDMONITOR_ENABLE_SHUTDOWN
+  startShutdownUi();
+#endif
+}
 
 void setStatus(lv_color_t color) {
   if (status_dot) {

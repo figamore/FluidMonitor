@@ -73,7 +73,11 @@ void showPairingSuccess() {
 void createMenuPanel(lv_obj_t* screen) {
   menu_panel = lv_obj_create(screen);
   lv_obj_add_style(menu_panel, &style_overlay, LV_PART_MAIN);
+#if FLUIDMONITOR_ENABLE_SHUTDOWN
+  lv_obj_set_size(menu_panel, 282, 232);
+#else
   lv_obj_set_size(menu_panel, 282, 184);
+#endif
   lv_obj_align(menu_panel, LV_ALIGN_CENTER, 0, 8);
   lv_obj_set_flex_flow(menu_panel, LV_FLEX_FLOW_COLUMN);
   lv_obj_set_style_pad_row(menu_panel, 8, LV_PART_MAIN);
@@ -136,6 +140,18 @@ void createMenuPanel(lv_obj_t* screen) {
   lv_obj_t* forget_label = lv_label_create(forget);
   lv_label_set_text(forget_label, "Forget");
   lv_obj_center(forget_label);
+
+#if FLUIDMONITOR_ENABLE_SHUTDOWN
+  lv_obj_t* shutdown = lv_btn_create(menu_panel);
+  lv_obj_add_style(shutdown, &style_button, LV_PART_MAIN);
+  lv_obj_set_size(shutdown, LV_PCT(100), 42);
+  lv_obj_add_event_cb(shutdown, onShutdown, LV_EVENT_CLICKED, nullptr);
+
+  lv_obj_t* shutdown_label = lv_label_create(shutdown);
+  lv_label_set_text(shutdown_label, "Shutdown");
+  lv_obj_set_style_text_font(shutdown_label, &lv_font_montserrat_16, LV_PART_MAIN);
+  lv_obj_center(shutdown_label);
+#endif
 }
 
 void createPairingSuccessPanel(lv_obj_t* screen) {

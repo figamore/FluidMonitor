@@ -6,6 +6,18 @@
 // Cheap Yellow Display capacitive profiles. Defaults match the FluidDial-tested
 // JC2432W328C-style board: ST7789 + CST816S + backlight on GPIO27.
 
+#ifndef FLUIDMONITOR_ENABLE_SHUTDOWN
+#define FLUIDMONITOR_ENABLE_SHUTDOWN 0
+#endif
+
+#ifndef FLUIDMONITOR_SHUTDOWN_GPIO
+#define FLUIDMONITOR_SHUTDOWN_GPIO 17
+#endif
+
+#ifndef FLUIDMONITOR_SHUTDOWN_HOLD_MS
+#define FLUIDMONITOR_SHUTDOWN_HOLD_MS 10200
+#endif
+
 #define CYD_PANEL_ILI9341 1
 #define CYD_PANEL_ST7789 2
 #define CYD_TOUCH_FT5X06 1
