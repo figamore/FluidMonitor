@@ -31,6 +31,7 @@ void loop() {
 
   pollSecureLink(now);
   applyDro();
+  pollShutdownControl();
   lv_timer_handler();
   delay(5);
 }

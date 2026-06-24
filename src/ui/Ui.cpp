@@ -3,10 +3,12 @@
 
 #include "Ui.h"
 
+#include <Arduino.h>
 #include <stdio.h>
 
 #include "../AppState.h"
 #include "../BatteryMonitor.h"
+#include "app_config.h"
 #include "ActionsView.h"
 #include "JogView.h"
 #include "SettingsView.h"
@@ -21,14 +23,83 @@ lv_obj_t* shutdown_overlay = nullptr;
 lv_obj_t* shutdown_countdown_label = nullptr;
 lv_timer_t* shutdown_timer = nullptr;
 uint32_t shutdown_started_ms = 0;
+bool shutdown_button_last_read_pressed = false;
+uint32_t shutdown_last_tap_ms = 0;
+uint32_t shutdown_last_press_edge_ms = 0;
+uint32_t shutdown_last_debug_status_ms = 0;
+
+void startShutdownUi();
+
+#if FLUIDMONITOR_SHUTDOWN_DEBUG
+const char* shutdownLevelName(bool pressed) {
+  return pressed ? "LOW/pressed" : "HIGH/released";
+}
+#endif
 
 void releaseShutdownKey() {
+#if FLUIDMONITOR_SHUTDOWN_PULLUP
+  pinMode(FLUIDMONITOR_SHUTDOWN_GPIO, INPUT_PULLUP);
+#else
   pinMode(FLUIDMONITOR_SHUTDOWN_GPIO, INPUT);
+#endif
+#if FLUIDMONITOR_SHUTDOWN_DEBUG
+  Serial.printf("Shutdown GPIO %d released to %s\n",
+                FLUIDMONITOR_SHUTDOWN_GPIO,
+                FLUIDMONITOR_SHUTDOWN_PULLUP ? "INPUT_PULLUP" : "INPUT");
+#endif
 }
 
 void holdShutdownKey() {
+#if FLUIDMONITOR_SHUTDOWN_DEBUG
+  Serial.printf("Shutdown GPIO %d driven LOW with OUTPUT_OPEN_DRAIN\n", FLUIDMONITOR_SHUTDOWN_GPIO);
+#endif
   digitalWrite(FLUIDMONITOR_SHUTDOWN_GPIO, LOW);
   pinMode(FLUIDMONITOR_SHUTDOWN_GPIO, OUTPUT_OPEN_DRAIN);
+}
+
+bool readShutdownButtonPressed() {
+  return digitalRead(FLUIDMONITOR_SHUTDOWN_GPIO) == LOW;
+}
+
+void syncShutdownButtonState(const char* reason) {
+  const bool pressed = readShutdownButtonPressed();
+  shutdown_button_last_read_pressed = pressed;
+  const uint32_t now = millis();
+  shutdown_last_tap_ms = 0;
+  shutdown_last_press_edge_ms = 0;
+  shutdown_last_debug_status_ms = now;
+#if FLUIDMONITOR_SHUTDOWN_DEBUG
+  Serial.printf("Shutdown GPIO state sync (%s): %s\n", reason, shutdownLevelName(pressed));
+#endif
+}
+
+void handleShutdownTap(uint32_t now) {
+  if (shutdown_last_press_edge_ms != 0 &&
+      now - shutdown_last_press_edge_ms < FLUIDMONITOR_SHUTDOWN_TAP_LOCKOUT_MS) {
+#if FLUIDMONITOR_SHUTDOWN_DEBUG
+    Serial.printf("Shutdown GPIO press pulse ignored: lockout delta=%ums\n",
+                  now - shutdown_last_press_edge_ms);
+#endif
+    shutdown_last_press_edge_ms = now;
+    return;
+  }
+
+  shutdown_last_press_edge_ms = now;
+
+  if (shutdown_last_tap_ms != 0 &&
+      now - shutdown_last_tap_ms <= FLUIDMONITOR_SHUTDOWN_DOUBLE_TAP_MS) {
+#if FLUIDMONITOR_SHUTDOWN_DEBUG
+    Serial.printf("Shutdown GPIO double tap detected: delta=%ums\n", now - shutdown_last_tap_ms);
+#endif
+    shutdown_last_tap_ms = 0;
+    startShutdownUi();
+    return;
+  }
+
+  shutdown_last_tap_ms = now;
+#if FLUIDMONITOR_SHUTDOWN_DEBUG
+  Serial.printf("Shutdown GPIO first tap at %ums\n", now);
+#endif
 }
 
 void closeShutdownOverlay() {
@@ -45,6 +116,8 @@ void closeShutdownOverlay() {
 
 void abortShutdown(lv_event_t*) {
   releaseShutdownKey();
+  delay(5);
+  syncShutdownButtonState("abort");
   closeShutdownOverlay();
 }
 
@@ -239,6 +312,49 @@ void createBatteryIndicator(lv_obj_t* parent) {
 void initShutdownControl() {
 #if FLUIDMONITOR_ENABLE_SHUTDOWN
   releaseShutdownKey();
+  delay(5);
+  syncShutdownButtonState("init");
+#if FLUIDMONITOR_SHUTDOWN_DEBUG
+  Serial.printf("Shutdown GPIO debug: gpio=%d active=LOW pullup=%u lockout=%ums double_tap=%ums hold=%ums\n",
+                FLUIDMONITOR_SHUTDOWN_GPIO,
+                FLUIDMONITOR_SHUTDOWN_PULLUP,
+                FLUIDMONITOR_SHUTDOWN_TAP_LOCKOUT_MS,
+                FLUIDMONITOR_SHUTDOWN_DOUBLE_TAP_MS,
+                FLUIDMONITOR_SHUTDOWN_HOLD_MS);
+#endif
+#endif
+}
+
+void pollShutdownControl() {
+#if FLUIDMONITOR_ENABLE_SHUTDOWN
+  if (shutdown_overlay) {
+    return;
+  }
+
+  const uint32_t now = millis();
+  const bool pressed = readShutdownButtonPressed();
+#if FLUIDMONITOR_SHUTDOWN_DEBUG
+  if (now - shutdown_last_debug_status_ms >= FLUIDMONITOR_SHUTDOWN_DEBUG_STATUS_MS) {
+    shutdown_last_debug_status_ms = now;
+    const uint32_t tap_age = shutdown_last_tap_ms == 0 ? 0 : now - shutdown_last_tap_ms;
+    Serial.printf("Shutdown GPIO status: raw=%s last_tap_age=%ums\n",
+                  shutdownLevelName(pressed),
+                  tap_age);
+  }
+#endif
+
+  if (pressed != shutdown_button_last_read_pressed) {
+    shutdown_button_last_read_pressed = pressed;
+#if FLUIDMONITOR_SHUTDOWN_DEBUG
+    Serial.printf("Shutdown GPIO raw transition: %s at %ums\n",
+                  shutdownLevelName(pressed),
+                  now);
+#endif
+    if (pressed) {
+      handleShutdownTap(now);
+    }
+    return;
+  }
 #endif
 }
 

@@ -6,6 +6,7 @@
 #include <lvgl.h>
 
 void initShutdownControl();
+void pollShutdownControl();
 void createUi();
 void onShutdown(lv_event_t* event);
 void applyDro();
