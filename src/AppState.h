@@ -4,7 +4,7 @@
 #pragma once
 
 #include <Arduino.h>
-#include <EspNowLink.h>
+#include <FluidNCEspNowClient.h>
 #include <lvgl.h>
 
 constexpr int kScreenWidth = 320;
@@ -26,7 +26,7 @@ struct DroStatus {
   char state[16] = {};
 };
 
-extern EspNowLink espnow;
+extern FluidNCEspNowClient fluidnc;
 
 extern lv_style_t style_screen;
 extern lv_style_t style_topbar;

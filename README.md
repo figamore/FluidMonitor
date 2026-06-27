@@ -1,8 +1,9 @@
 # FluidMonitor
 
 FluidMonitor is a LovyanGFX + LVGL DRO monitor app for CYD-style ESP32 displays.
-It uses EspNowLink as a client transport and provides status,
-jogging, and machine action controls.
+It uses the [FluidNC-EspNow-Client](https://github.com/figamore/FluidNC-EspNow-Client) library for
+paired ESP-NOW transport and FluidNC status parsing, and provides status, jogging,
+and machine action controls.
 
 ## Build
 
@@ -14,8 +15,7 @@ pio run -e esp32-cyd-capacitive
 
 - `src/main.cpp` - app startup, loop timing, and top-level lifecycle.
 - `src/Display.*` - LovyanGFX, LVGL display driver, touch input, and backlight.
-- `src/EspNowLinkClient.*` - pairing, reconnect, status polling, and transport send helpers.
-- `src/StatusParser.*` - FluidNC-style status report parsing.
+- `src/FluidLink.*` - FluidNC-EspNow-Client setup, connection callbacks, and status handling.
 - `src/ui/` - LVGL views for Status, Jog, Actions, and Settings.
 
 ## Pairing

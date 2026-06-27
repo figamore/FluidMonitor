@@ -30,15 +30,15 @@ void onPairingMainView(lv_event_t*) {
 }
 
 void onPair(lv_event_t*) {
-  if (espnow.isPairing()) {
-    espnow.cancelPairing();
+  if (fluidnc.isPairing()) {
+    fluidnc.cancelPairing();
     return;
   }
-  espnow.startPairing();
+  fluidnc.startPairing();
 }
 
 void onForget(lv_event_t*) {
-  espnow.clearProfiles();
+  fluidnc.forgetAllMachines();
   setStatus(lv_color_hex(0xF59E0B));
   if (peer_label) {
     lv_label_set_text(peer_label, "No paired machine");
@@ -54,10 +54,9 @@ void setPairButtonText(const char* text) {
 }
 
 void updatePeerLabel() {
-  EspNowLinkProfile profile;
-  if (espnow.profileCount() > 0 && espnow.getProfile(0, profile)) {
-    String text = String(profile.hostname[0] ? profile.hostname : "FluidNC") + "  " + EspNowLink::formatMac(profile.mac);
-    lv_label_set_text(peer_label, text.c_str());
+  FluidNCMachine machine;
+  if (fluidnc.getMachine(0, machine)) {
+    lv_label_set_text(peer_label, machine.label().c_str());
   } else {
     lv_label_set_text(peer_label, "No paired machine");
   }

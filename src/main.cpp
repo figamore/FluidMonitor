@@ -2,24 +2,21 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <Arduino.h>
-#include <WiFi.h>
 #include <lvgl.h>
 
 #include "BatteryMonitor.h"
 #include "Display.h"
-#include "EspNowLinkClient.h"
+#include "FluidLink.h"
 #include "ui/Ui.h"
 
 void setup() {
   Serial.begin(115200);
   delay(100);
   initShutdownControl();
-  WiFi.mode(WIFI_STA);
-  WiFi.setSleep(false);
   initDisplay();
   initBatteryMonitor();
   createUi();
-  initSecureLink();
+  initFluidLink();
 }
 
 void loop() {
@@ -29,7 +26,7 @@ void loop() {
   last_tick_ms = now;
   lv_tick_inc(elapsed);
 
-  pollSecureLink(now);
+  pollFluidLink();
   applyDro();
   pollShutdownControl();
   lv_timer_handler();

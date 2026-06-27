@@ -3,7 +3,7 @@
 
 #include "AppState.h"
 
-EspNowLink espnow;
+FluidNCEspNowClient fluidnc("cyd-dro");
 
 lv_style_t style_screen;
 lv_style_t style_topbar;

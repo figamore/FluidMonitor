@@ -3,7 +3,7 @@
 
 #include "ActionsView.h"
 
-#include "../EspNowLinkClient.h"
+#include "../AppState.h"
 #include "JogView.h"
 #include "Ui.h"
 
@@ -18,7 +18,7 @@ void onCommandAction(lv_event_t* event) {
     return;
   }
   cancelJog();
-  sendLine(command);
+  fluidnc.sendLine(command);
 }
 
 }  // namespace

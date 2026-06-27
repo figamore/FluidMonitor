@@ -3,11 +3,7 @@
 
 #include "JogView.h"
 
-#include <stdio.h>
-#include <string.h>
-
 #include "../AppState.h"
-#include "../EspNowLinkClient.h"
 #include "Ui.h"
 
 namespace {
@@ -46,28 +42,21 @@ void onJogStep(lv_event_t* event) {
   selectJogStep(static_cast<uint8_t>(reinterpret_cast<uintptr_t>(lv_event_get_user_data(event))));
 }
 
-bool fluidNcIdle() {
-  return latest_dro.state[0] == '\0' || strcmp(latest_dro.state, "Idle") == 0;
-}
-
 void startJog(char axis, int direction) {
-  if (!espnow.isConnected()) {
+  if (!fluidnc.isConnected()) {
     setStatus(lv_color_hex(0xF87171));
     return;
   }
-  if (!fluidNcIdle()) {
+  if (!fluidnc.isIdle()) {
     setStatus(lv_color_hex(0xF59E0B));
     return;
   }
   cancelJog();
 
-  const float distance = selectedJogDistance();
-  const float feedrate = distance * 300.0f;
-  const float long_distance = 5000.0f * (direction < 0 ? -1.0f : 1.0f);
-  char cmd[48];
-  snprintf(cmd, sizeof(cmd), "$J=G91G21F%.3f%c%.3f", feedrate, axis, long_distance);
-  sendLine(cmd);
-  jog_active = true;
+  const float feedrate = selectedJogDistance() * 300.0f;
+  if (fluidnc.jogContinuous(axis, direction, feedrate)) {
+    jog_active = true;
+  }
 }
 
 void onJogButton(lv_event_t* event) {
@@ -104,8 +93,8 @@ lv_obj_t* createJogButton(lv_obj_t* parent, const char* text, char axis, int dir
 }  // namespace
 
 void cancelJog() {
-  if (jog_active || espnow.isConnected()) {
-    espnow.sendRealtime(0x85);
+  if (jog_active || fluidnc.isConnected()) {
+    fluidnc.jogCancel();
   }
   jog_active = false;
 }
