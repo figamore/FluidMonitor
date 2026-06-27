@@ -116,7 +116,6 @@ class LGFX : public lgfx::LGFX_Device {
 LGFX gfx;
 lv_disp_draw_buf_t draw_buf;
 lv_color_t draw_buf_1[kScreenWidth * kLvglBufferLines];
-lv_color_t draw_buf_2[kScreenWidth * kLvglBufferLines];
 
 uint8_t dimBrightness() {
   uint8_t value = active_brightness / 5;
@@ -188,7 +187,7 @@ void initDisplay() {
   gfx.setBrightness(active_brightness);
 
   lv_init();
-  lv_disp_draw_buf_init(&draw_buf, draw_buf_1, draw_buf_2, kScreenWidth * kLvglBufferLines);
+  lv_disp_draw_buf_init(&draw_buf, draw_buf_1, nullptr, kScreenWidth * kLvglBufferLines);
 
   static lv_disp_drv_t disp_drv;
   lv_disp_drv_init(&disp_drv);

@@ -235,7 +235,7 @@ lv_obj_t* battery_charge = nullptr;
 
 lv_color_t batteryColor(int level) {
   if (level >= 50) {
-    return lv_color_hex(0x22C55E);
+    return lv_color_hex(0x34C759);
   }
   if (level >= 25) {
     return lv_color_hex(0xFACC15);
@@ -254,12 +254,12 @@ void createBatteryIndicator(lv_obj_t* parent) {
 
   battery_indicator = lv_obj_create(parent);
   lv_obj_remove_style_all(battery_indicator);
-  lv_obj_set_size(battery_indicator, 28, 18);
+  lv_obj_set_size(battery_indicator, 30, 18);
   lv_obj_clear_flag(battery_indicator, LV_OBJ_FLAG_SCROLLABLE);
 
   lv_obj_t* body = lv_obj_create(battery_indicator);
   lv_obj_remove_style_all(body);
-  lv_obj_set_size(body, 20, 13);
+  lv_obj_set_size(body, 22, 14);
   lv_obj_align(body, LV_ALIGN_LEFT_MID, 0, 0);
   lv_obj_set_style_border_width(body, 1, LV_PART_MAIN);
   lv_obj_set_style_border_color(body, lv_color_hex(0xF8FAFC), LV_PART_MAIN);
@@ -268,7 +268,7 @@ void createBatteryIndicator(lv_obj_t* parent) {
 
   battery_fill = lv_obj_create(body);
   lv_obj_remove_style_all(battery_fill);
-  lv_obj_set_size(battery_fill, 2, 11);
+  lv_obj_set_size(battery_fill, 3, 10);
   lv_obj_align(battery_fill, LV_ALIGN_TOP_LEFT, 1, 1);
   lv_obj_set_style_bg_opa(battery_fill, LV_OPA_COVER, LV_PART_MAIN);
   lv_obj_set_style_bg_color(battery_fill, lv_color_hex(0xEF4444), LV_PART_MAIN);
@@ -276,17 +276,17 @@ void createBatteryIndicator(lv_obj_t* parent) {
 
   lv_obj_t* nub = lv_obj_create(battery_indicator);
   lv_obj_remove_style_all(nub);
-  lv_obj_set_size(nub, 4, 7);
-  lv_obj_align(nub, LV_ALIGN_LEFT_MID, 20, 0);
+  lv_obj_set_size(nub, 4, 6);
+  lv_obj_align(nub, LV_ALIGN_LEFT_MID, 22, 0);
   lv_obj_set_style_bg_opa(nub, LV_OPA_COVER, LV_PART_MAIN);
   lv_obj_set_style_bg_color(nub, lv_color_hex(0xF8FAFC), LV_PART_MAIN);
   lv_obj_clear_flag(nub, LV_OBJ_FLAG_SCROLLABLE);
 
   battery_charge = lv_label_create(battery_indicator);
   lv_label_set_text(battery_charge, LV_SYMBOL_CHARGE);
-  lv_obj_set_style_text_font(battery_charge, &lv_font_montserrat_12, LV_PART_MAIN);
-  lv_obj_set_style_text_color(battery_charge, lv_color_hex(0x22C55E), LV_PART_MAIN);
-  lv_obj_align(battery_charge, LV_ALIGN_CENTER, -2, 0);
+  lv_obj_set_style_text_font(battery_charge, &lv_font_montserrat_10, LV_PART_MAIN);
+  lv_obj_set_style_text_color(battery_charge, lv_color_hex(0x34C759), LV_PART_MAIN);
+  lv_obj_align(battery_charge, LV_ALIGN_CENTER, -4, 0);
 
   updateBatteryIndicator();
   lv_timer_create(updateBatteryTimer, 1000, nullptr);
@@ -383,13 +383,13 @@ void updateBatteryIndicator() {
 
   lv_obj_clear_flag(battery_indicator, LV_OBJ_FLAG_HIDDEN);
 
-  int fill_w = 2;
+  int fill_w = 3;
   if (level >= 75) {
     fill_w = 18;
   } else if (level >= 50) {
-    fill_w = 9;
+    fill_w = 11;
   } else if (level >= 25) {
-    fill_w = 4;
+    fill_w = 7;
   }
 
   bool charging = batteryCharging();
@@ -468,7 +468,7 @@ void createUi() {
 
   lv_obj_t* right = lv_obj_create(topbar);
   lv_obj_remove_style_all(right);
-  lv_obj_set_size(right, batteryAvailable() ? 60 : 12, 34);
+  lv_obj_set_size(right, batteryAvailable() ? 62 : 12, 34);
   lv_obj_set_flex_flow(right, LV_FLEX_FLOW_ROW);
   lv_obj_set_flex_align(right, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
   lv_obj_clear_flag(right, LV_OBJ_FLAG_SCROLLABLE);
