@@ -4,12 +4,21 @@
 #include "Display.h"
 
 #include <LovyanGFX.hpp>
+#include <Preferences.h>
 #include <lvgl.h>
 
 #include "AppState.h"
 #include "app_config.h"
 
 namespace {
+
+// Never let the backlight go fully dark, otherwise the screen looks dead and
+// the user cannot find the controls to turn it back up.
+constexpr uint8_t kMinBrightness = 24;
+constexpr char kPrefsNamespace[] = "fluidmon";
+constexpr char kPrefsBrightnessKey[] = "bright";
+
+uint8_t active_brightness = UI_ACTIVE_BRIGHTNESS;
 
 class LGFX : public lgfx::LGFX_Device {
   lgfx::Bus_SPI bus_;
@@ -101,7 +110,7 @@ lv_color_t draw_buf_1[kScreenWidth * kLvglBufferLines];
 lv_color_t draw_buf_2[kScreenWidth * kLvglBufferLines];
 
 void touchActivity() {
-  gfx.setBrightness(UI_ACTIVE_BRIGHTNESS);
+  gfx.setBrightness(active_brightness);
 }
 
 void flushDisplay(lv_disp_drv_t* disp, const lv_area_t* area, lv_color_t* color_p) {
@@ -138,7 +147,16 @@ void readTouch(lv_indev_drv_t*, lv_indev_data_t* data) {
 void initDisplay() {
   gfx.init();
   gfx.setRotation(1);
-  gfx.setBrightness(UI_ACTIVE_BRIGHTNESS);
+
+  Preferences prefs;
+  if (prefs.begin(kPrefsNamespace, true)) {
+    active_brightness = prefs.getUChar(kPrefsBrightnessKey, UI_ACTIVE_BRIGHTNESS);
+    prefs.end();
+  }
+  if (active_brightness < kMinBrightness) {
+    active_brightness = kMinBrightness;
+  }
+  gfx.setBrightness(active_brightness);
 
   lv_init();
   lv_disp_draw_buf_init(&draw_buf, draw_buf_1, draw_buf_2, kScreenWidth * kLvglBufferLines);
@@ -156,4 +174,22 @@ void initDisplay() {
   indev_drv.type = LV_INDEV_TYPE_POINTER;
   indev_drv.read_cb = readTouch;
   lv_indev_drv_register(&indev_drv);
+}
+
+void setDisplayBrightness(uint8_t value) {
+  if (value < kMinBrightness) {
+    value = kMinBrightness;
+  }
+  active_brightness = value;
+  gfx.setBrightness(active_brightness);
+
+  Preferences prefs;
+  if (prefs.begin(kPrefsNamespace, false)) {
+    prefs.putUChar(kPrefsBrightnessKey, active_brightness);
+    prefs.end();
+  }
+}
+
+uint8_t displayBrightness() {
+  return active_brightness;
 }

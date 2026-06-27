@@ -35,19 +35,19 @@ void onStatus(const FluidNCStatus& status) {
 void initFluidLink() {
   fluidnc.onPairingStarted([]() {
     setStatus(lv_color_hex(0x38BDF8));
-    setPairButtonText("Cancel");
+    setPairButtonText(LV_SYMBOL_CLOSE "  Cancel");
   });
   fluidnc.onPairingCancelled([]() {
     setStatus(lv_color_hex(0xF59E0B));
-    setPairButtonText("Pair");
+    setPairButtonText(LV_SYMBOL_BLUETOOTH "  Pair");
   });
   fluidnc.onPairingFailed([]() {
     setStatus(lv_color_hex(0xF87171));
-    setPairButtonText("Pair");
+    setPairButtonText(LV_SYMBOL_BLUETOOTH "  Pair");
   });
   fluidnc.onPaired([](const FluidNCMachine&) {
     setStatus(lv_color_hex(0x34D399));
-    setPairButtonText("Pair");
+    setPairButtonText(LV_SYMBOL_BLUETOOTH "  Pair");
     updatePeerLabel();
     showPairingSuccess();
   });

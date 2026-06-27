@@ -46,7 +46,7 @@ extern lv_obj_t* coord_machine_button;
 extern lv_obj_t* units_label;
 extern lv_obj_t* pair_button;
 extern lv_obj_t* pair_label;
-extern lv_obj_t* menu_panel;
+extern lv_obj_t* brightness_label;
 extern lv_obj_t* pairing_success_panel;
 extern lv_obj_t* jog_step_buttons[4];
 

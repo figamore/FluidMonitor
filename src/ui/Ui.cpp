@@ -151,10 +151,6 @@ void startShutdownUi() {
   shutdown_started_ms = millis();
   holdShutdownKey();
 
-  if (menu_panel) {
-    lv_obj_add_flag(menu_panel, LV_OBJ_FLAG_HIDDEN);
-  }
-
   shutdown_overlay = lv_obj_create(lv_scr_act());
   lv_obj_add_style(shutdown_overlay, &style_overlay, LV_PART_MAIN);
   lv_obj_set_size(shutdown_overlay, 250, 176);
@@ -231,17 +227,6 @@ void initStyles() {
   lv_style_set_border_color(&style_overlay, lv_color_hex(0x38BDF8));
   lv_style_set_radius(&style_overlay, 8);
   lv_style_set_pad_all(&style_overlay, 10);
-}
-
-void onMenu(lv_event_t*) {
-  if (!menu_panel) {
-    return;
-  }
-  if (lv_obj_has_flag(menu_panel, LV_OBJ_FLAG_HIDDEN)) {
-    lv_obj_clear_flag(menu_panel, LV_OBJ_FLAG_HIDDEN);
-  } else {
-    lv_obj_add_flag(menu_panel, LV_OBJ_FLAG_HIDDEN);
-  }
 }
 
 lv_obj_t* battery_indicator = nullptr;
@@ -455,38 +440,36 @@ void createUi() {
   lv_obj_set_scrollbar_mode(topbar, LV_SCROLLBAR_MODE_OFF);
   lv_obj_clear_flag(topbar, LV_OBJ_FLAG_SCROLLABLE);
 
-  state_label = lv_label_create(topbar);
-  lv_obj_set_width(state_label, 122);
+  lv_obj_t* left = lv_obj_create(topbar);
+  lv_obj_remove_style_all(left);
+  lv_obj_set_size(left, 200, 34);
+  lv_obj_set_flex_flow(left, LV_FLEX_FLOW_ROW);
+  lv_obj_set_flex_align(left, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+  lv_obj_set_style_pad_column(left, 8, LV_PART_MAIN);
+  lv_obj_clear_flag(left, LV_OBJ_FLAG_SCROLLABLE);
+
+  status_dot = lv_obj_create(left);
+  lv_obj_remove_style_all(status_dot);
+  lv_obj_set_size(status_dot, 12, 12);
+  lv_obj_set_style_radius(status_dot, LV_RADIUS_CIRCLE, LV_PART_MAIN);
+  lv_obj_set_style_bg_opa(status_dot, LV_OPA_COVER, LV_PART_MAIN);
+  lv_obj_set_style_bg_color(status_dot, lv_color_hex(0x38BDF8), LV_PART_MAIN);
+
+  state_label = lv_label_create(left);
   lv_label_set_text(state_label, "State: --");
   lv_obj_set_style_text_font(state_label, &lv_font_montserrat_18, LV_PART_MAIN);
   lv_obj_set_style_text_color(state_label, lv_color_hex(0x67E8F9), LV_PART_MAIN);
 
   lv_obj_t* right = lv_obj_create(topbar);
   lv_obj_remove_style_all(right);
-  lv_obj_set_size(right, batteryAvailable() ? 164 : 124, 34);
+  lv_obj_set_size(right, batteryAvailable() ? 60 : 12, 34);
   lv_obj_set_flex_flow(right, LV_FLEX_FLOW_ROW);
   lv_obj_set_flex_align(right, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-  lv_obj_set_style_pad_column(right, 10, LV_PART_MAIN);
   lv_obj_clear_flag(right, LV_OBJ_FLAG_SCROLLABLE);
-
-  status_dot = lv_obj_create(right);
-  lv_obj_remove_style_all(status_dot);
-  lv_obj_set_size(status_dot, 10, 10);
-  lv_obj_set_style_radius(status_dot, LV_RADIUS_CIRCLE, LV_PART_MAIN);
-  lv_obj_set_style_bg_opa(status_dot, LV_OPA_COVER, LV_PART_MAIN);
-  lv_obj_set_style_bg_color(status_dot, lv_color_hex(0x38BDF8), LV_PART_MAIN);
-
-  lv_obj_t* menu = lv_btn_create(right);
-  lv_obj_add_style(menu, &style_button, LV_PART_MAIN);
-  lv_obj_set_size(menu, 96, 32);
-  lv_obj_add_event_cb(menu, onMenu, LV_EVENT_CLICKED, nullptr);
-  lv_obj_t* menu_label = lv_label_create(menu);
-  lv_label_set_text(menu_label, "Settings");
-  lv_obj_center(menu_label);
 
   createBatteryIndicator(right);
 
-  lv_obj_t* tabs = lv_tabview_create(root, LV_DIR_TOP, 30);
+  lv_obj_t* tabs = lv_tabview_create(root, LV_DIR_TOP, 32);
   lv_obj_set_size(tabs, LV_PCT(100), kScreenHeight - 42);
   lv_obj_set_style_bg_color(tabs, lv_color_hex(0x0B1014), LV_PART_MAIN);
   lv_obj_set_style_border_width(tabs, 0, LV_PART_MAIN);
@@ -498,15 +481,16 @@ void createUi() {
   lv_obj_set_style_text_color(tab_btns, lv_color_hex(0xFFFFFF), LV_PART_ITEMS | LV_STATE_CHECKED);
   lv_obj_set_style_bg_color(tab_btns, lv_color_hex(0x2563EB), LV_PART_ITEMS | LV_STATE_CHECKED);
 
-  lv_obj_t* status_tab = lv_tabview_add_tab(tabs, "Status");
-  lv_obj_t* jog_tab = lv_tabview_add_tab(tabs, "Jog");
-  lv_obj_t* actions_tab = lv_tabview_add_tab(tabs, "Actions");
+  lv_obj_t* status_tab = lv_tabview_add_tab(tabs, LV_SYMBOL_GPS " Status");
+  lv_obj_t* jog_tab = lv_tabview_add_tab(tabs, LV_SYMBOL_SHUFFLE " Jog");
+  lv_obj_t* actions_tab = lv_tabview_add_tab(tabs, LV_SYMBOL_LIST " Actions");
+  lv_obj_t* settings_tab = lv_tabview_add_tab(tabs, LV_SYMBOL_SETTINGS " Settings");
   createStatusTab(status_tab);
   createJogTab(jog_tab);
   createActionsTab(actions_tab);
+  createSettingsTab(settings_tab);
   lv_tabview_set_act(tabs, 0, LV_ANIM_OFF);
 
-  createMenuPanel(screen);
   createPairingSuccessPanel(screen);
 }
 

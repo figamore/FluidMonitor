@@ -5,7 +5,7 @@
 
 #include <lvgl.h>
 
-void createMenuPanel(lv_obj_t* screen);
+void createSettingsTab(lv_obj_t* tab);
 void createPairingSuccessPanel(lv_obj_t* screen);
 void showPairingSuccess();
 void updatePeerLabel();

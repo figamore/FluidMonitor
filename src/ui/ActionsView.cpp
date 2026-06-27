@@ -49,6 +49,9 @@ void createActionsTab(lv_obj_t* tab) {
   lv_obj_set_style_pad_column(row_two, 10, LV_PART_MAIN);
   lv_obj_clear_flag(row_two, LV_OBJ_FLAG_SCROLLABLE);
 
-  createSmallButton(row_two, "Zero All", onCommandAction, const_cast<char*>("G10L20P0X0Y0Z0"));
-  createSmallButton(row_two, "Home All", onCommandAction, const_cast<char*>("$H"));
+  lv_obj_t* zero_all =
+      createSmallButton(row_two, LV_SYMBOL_GPS " Zero All", onCommandAction, const_cast<char*>("G10L20P0X0Y0Z0"));
+  lv_obj_set_width(zero_all, 132);
+  lv_obj_t* home_all = createSmallButton(row_two, LV_SYMBOL_HOME " Home All", onCommandAction, const_cast<char*>("$H"));
+  lv_obj_set_width(home_all, 132);
 }

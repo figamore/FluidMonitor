@@ -23,7 +23,7 @@ lv_obj_t* coord_machine_button = nullptr;
 lv_obj_t* units_label = nullptr;
 lv_obj_t* pair_button = nullptr;
 lv_obj_t* pair_label = nullptr;
-lv_obj_t* menu_panel = nullptr;
+lv_obj_t* brightness_label = nullptr;
 lv_obj_t* pairing_success_panel = nullptr;
 lv_obj_t* jog_step_buttons[4] = {};
 

@@ -20,9 +20,16 @@ pio run -e esp32-cyd-capacitive
 
 ## Pairing
 
-Open a pairing window on the ESP-NOW server, then tap **Settings** in the app and
-start pairing. Once paired, the app stores the machine profile in NVS and
+Open a pairing window on the ESP-NOW server, then open the **Settings** tab in the
+app and tap **Pair**. Once paired, the app stores the machine profile in NVS and
 reconnects automatically.
+
+## Settings
+
+The **Settings** tab (next to Actions) groups the **Connection** controls (Pair /
+Forget), a **Display** brightness adjustment that persists across reboots, and an
+**About** section showing the active units. On shutdown-enabled builds it also
+hosts the **Shutdown** button.
 
 ## License
 

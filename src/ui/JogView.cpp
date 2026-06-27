@@ -130,20 +130,20 @@ void createJogTab(lv_obj_t* tab) {
   lv_obj_set_size(pad, LV_PCT(100), 118);
   lv_obj_clear_flag(pad, LV_OBJ_FLAG_SCROLLABLE);
 
-  lv_obj_t* y_plus = createJogButton(pad, "Y+", 'Y', 1, lv_color_hex(0x34D399));
+  lv_obj_t* y_plus = createJogButton(pad, "Y" LV_SYMBOL_UP, 'Y', 1, lv_color_hex(0x34D399));
   lv_obj_align(y_plus, LV_ALIGN_TOP_MID, -42, 0);
-  lv_obj_t* z_plus = createJogButton(pad, "Z+", 'Z', 1, lv_color_hex(0x60A5FA));
+  lv_obj_t* z_plus = createJogButton(pad, "Z" LV_SYMBOL_UP, 'Z', 1, lv_color_hex(0x60A5FA));
   lv_obj_align(z_plus, LV_ALIGN_TOP_RIGHT, -12, 0);
 
-  lv_obj_t* x_minus = createJogButton(pad, "X-", 'X', -1, lv_color_hex(0xF87171));
+  lv_obj_t* x_minus = createJogButton(pad, "X" LV_SYMBOL_LEFT, 'X', -1, lv_color_hex(0xF87171));
   lv_obj_align(x_minus, LV_ALIGN_CENTER, -122, 0);
 
-  lv_obj_t* x_plus = createJogButton(pad, "X+", 'X', 1, lv_color_hex(0xF87171));
+  lv_obj_t* x_plus = createJogButton(pad, "X" LV_SYMBOL_RIGHT, 'X', 1, lv_color_hex(0xF87171));
   lv_obj_align(x_plus, LV_ALIGN_CENTER, 38, 0);
 
-  lv_obj_t* y_minus = createJogButton(pad, "Y-", 'Y', -1, lv_color_hex(0x34D399));
+  lv_obj_t* y_minus = createJogButton(pad, "Y" LV_SYMBOL_DOWN, 'Y', -1, lv_color_hex(0x34D399));
   lv_obj_align(y_minus, LV_ALIGN_BOTTOM_MID, -42, 0);
-  lv_obj_t* z_minus = createJogButton(pad, "Z-", 'Z', -1, lv_color_hex(0x60A5FA));
+  lv_obj_t* z_minus = createJogButton(pad, "Z" LV_SYMBOL_DOWN, 'Z', -1, lv_color_hex(0x60A5FA));
   lv_obj_align(z_minus, LV_ALIGN_BOTTOM_RIGHT, -12, 0);
 
   updateJogStepButtons();
