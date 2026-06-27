@@ -7,6 +7,8 @@
 
 void initDisplay();
 
+bool touchDragging();
+
 void setDisplayBrightness(uint8_t value);
 uint8_t displayBrightness();
 

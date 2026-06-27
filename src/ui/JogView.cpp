@@ -4,6 +4,7 @@
 #include "JogView.h"
 
 #include "../AppState.h"
+#include "../Display.h"
 #include "Ui.h"
 
 namespace {
@@ -59,15 +60,41 @@ void startJog(char axis, int direction) {
   }
 }
 
+constexpr uint32_t kJogStartDelayMs = 120;
+lv_timer_t* jog_start_timer = nullptr;
+char pending_jog_axis = 0;
+int pending_jog_dir = 0;
+
+void clearPendingJog() {
+  if (jog_start_timer) {
+    lv_timer_del(jog_start_timer);
+    jog_start_timer = nullptr;
+  }
+}
+
+void onJogStartTimer(lv_timer_t*) {
+  jog_start_timer = nullptr;
+  if (touchDragging()) {
+    return;
+  }
+  startJog(pending_jog_axis, pending_jog_dir);
+}
+
 void onJogButton(lv_event_t* event) {
   const lv_event_code_t code = lv_event_get_code(event);
   const uintptr_t data = reinterpret_cast<uintptr_t>(lv_event_get_user_data(event));
   const char axis = static_cast<char>((data >> 8) & 0xff);
   const int direction = (data & 0xff) ? 1 : -1;
 
+  // wait briefly so a swipe (which scrolls and drops the press) never starts motion
   if (code == LV_EVENT_PRESSED) {
-    startJog(axis, direction);
+    pending_jog_axis = axis;
+    pending_jog_dir = direction;
+    clearPendingJog();
+    jog_start_timer = lv_timer_create(onJogStartTimer, kJogStartDelayMs, nullptr);
+    lv_timer_set_repeat_count(jog_start_timer, 1);
   } else if (code == LV_EVENT_RELEASED || code == LV_EVENT_PRESS_LOST || code == LV_EVENT_CANCEL) {
+    clearPendingJog();
     cancelJog();
   }
 }
@@ -77,6 +104,16 @@ lv_obj_t* createJogButton(lv_obj_t* parent, const char* text, char axis, int dir
   lv_obj_add_style(button, &style_button, LV_PART_MAIN);
   lv_obj_set_size(button, 70, 48);
   lv_obj_set_style_bg_color(button, lv_color_hex(0x1B2430), LV_PART_MAIN);
+
+  lv_obj_set_style_bg_color(button, lv_color_hex(0x33455B), LV_PART_MAIN | LV_STATE_PRESSED);
+  lv_obj_set_style_border_color(button, color, LV_PART_MAIN | LV_STATE_PRESSED);
+  lv_obj_set_style_border_width(button, 2, LV_PART_MAIN | LV_STATE_PRESSED);
+  lv_obj_set_style_outline_color(button, color, LV_PART_MAIN | LV_STATE_PRESSED);
+  lv_obj_set_style_outline_width(button, 3, LV_PART_MAIN | LV_STATE_PRESSED);
+  lv_obj_set_style_outline_opa(button, LV_OPA_50, LV_PART_MAIN | LV_STATE_PRESSED);
+  lv_obj_set_style_transform_width(button, -3, LV_PART_MAIN | LV_STATE_PRESSED);
+  lv_obj_set_style_transform_height(button, -3, LV_PART_MAIN | LV_STATE_PRESSED);
+
   lv_obj_add_event_cb(button,
                       onJogButton,
                       LV_EVENT_ALL,

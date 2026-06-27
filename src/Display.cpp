@@ -29,6 +29,12 @@ uint8_t inactivity_mode = kInactivityDim;
 uint32_t last_activity_ms = 0;
 bool display_sleeping = false;
 
+constexpr int16_t kDragThreshold = 10;
+bool touch_down = false;
+bool touch_dragged = false;
+int16_t touch_origin_x = 0;
+int16_t touch_origin_y = 0;
+
 class LGFX : public lgfx::LGFX_Device {
   lgfx::Bus_SPI bus_;
   lgfx::Light_PWM light_;
@@ -151,6 +157,14 @@ void readTouch(lv_indev_drv_t*, lv_indev_data_t* data) {
     if (noteActivity()) {
       suppress_touch_until_release = true;
     }
+    if (!touch_down) {
+      touch_down = true;
+      touch_dragged = false;
+      touch_origin_x = x;
+      touch_origin_y = y;
+    } else if (abs(x - touch_origin_x) > kDragThreshold || abs(y - touch_origin_y) > kDragThreshold) {
+      touch_dragged = true;
+    }
     if (suppress_touch_until_release) {
       data->state = LV_INDEV_STATE_REL;
       return;
@@ -160,11 +174,16 @@ void readTouch(lv_indev_drv_t*, lv_indev_data_t* data) {
     data->point.y = y;
   } else {
     suppress_touch_until_release = false;
+    touch_down = false;
     data->state = LV_INDEV_STATE_REL;
   }
 }
 
 }  // namespace
+
+bool touchDragging() {
+  return touch_dragged;
+}
 
 void initDisplay() {
   gfx.init();
@@ -201,6 +220,7 @@ void initDisplay() {
   lv_indev_drv_init(&indev_drv);
   indev_drv.type = LV_INDEV_TYPE_POINTER;
   indev_drv.read_cb = readTouch;
+  indev_drv.scroll_limit = 6;
   lv_indev_drv_register(&indev_drv);
 }
 
