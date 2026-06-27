@@ -27,7 +27,8 @@ reconnects automatically.
 ## Settings
 
 The **Settings** tab (next to Actions) groups the **Connection** controls (Pair /
-Forget), a **Display** brightness adjustment that persists across reboots, and an
+Forget), a **Display** section with brightness adjustment and a 180-degree
+**Orientation** flip (both persisted to NVS and reapplied on boot), and an
 **About** section showing the active units. On shutdown-enabled builds it also
 hosts the **Shutdown** button.
 

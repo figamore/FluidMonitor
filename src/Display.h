@@ -12,3 +12,8 @@ void initDisplay();
 // active value.
 void setDisplayBrightness(uint8_t value);
 uint8_t displayBrightness();
+
+// Screen orientation. When flipped, the display (and touch) are rotated 180
+// degrees. The choice persists to NVS and is reapplied on boot.
+void setDisplayFlipped(bool flipped);
+bool displayFlipped();

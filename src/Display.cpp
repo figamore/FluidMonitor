@@ -17,8 +17,14 @@ namespace {
 constexpr uint8_t kMinBrightness = 24;
 constexpr char kPrefsNamespace[] = "fluidmon";
 constexpr char kPrefsBrightnessKey[] = "bright";
+constexpr char kPrefsFlipKey[] = "flip";
+
+// Base landscape rotation; the 180-degree flip uses the opposite landscape.
+constexpr uint8_t kRotationNormal = 1;
+constexpr uint8_t kRotationFlipped = 3;
 
 uint8_t active_brightness = UI_ACTIVE_BRIGHTNESS;
+bool display_flipped = false;
 
 class LGFX : public lgfx::LGFX_Device {
   lgfx::Bus_SPI bus_;
@@ -146,16 +152,17 @@ void readTouch(lv_indev_drv_t*, lv_indev_data_t* data) {
 
 void initDisplay() {
   gfx.init();
-  gfx.setRotation(1);
 
   Preferences prefs;
   if (prefs.begin(kPrefsNamespace, true)) {
     active_brightness = prefs.getUChar(kPrefsBrightnessKey, UI_ACTIVE_BRIGHTNESS);
+    display_flipped = prefs.getBool(kPrefsFlipKey, false);
     prefs.end();
   }
   if (active_brightness < kMinBrightness) {
     active_brightness = kMinBrightness;
   }
+  gfx.setRotation(display_flipped ? kRotationFlipped : kRotationNormal);
   gfx.setBrightness(active_brightness);
 
   lv_init();
@@ -192,4 +199,22 @@ void setDisplayBrightness(uint8_t value) {
 
 uint8_t displayBrightness() {
   return active_brightness;
+}
+
+void setDisplayFlipped(bool flipped) {
+  display_flipped = flipped;
+  gfx.setRotation(display_flipped ? kRotationFlipped : kRotationNormal);
+
+  Preferences prefs;
+  if (prefs.begin(kPrefsNamespace, false)) {
+    prefs.putBool(kPrefsFlipKey, display_flipped);
+    prefs.end();
+  }
+
+  // The framebuffer mapping changed under LVGL; force a full repaint.
+  lv_obj_invalidate(lv_scr_act());
+}
+
+bool displayFlipped() {
+  return display_flipped;
 }

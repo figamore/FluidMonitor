@@ -34,7 +34,7 @@ void onForget(lv_event_t*) {
   fluidnc.forgetAllMachines();
   setStatus(lv_color_hex(0xF59E0B));
   if (peer_label) {
-    lv_label_set_text(peer_label, LV_SYMBOL_WIFI "  No paired machine");
+    lv_label_set_text(peer_label, "No paired machine");
   }
 }
 
@@ -66,6 +66,20 @@ void onBrightnessUp(lv_event_t*) {
   }
   setDisplayBrightness(static_cast<uint8_t>(value));
   updateBrightnessLabel();
+}
+
+lv_obj_t* orientation_value = nullptr;
+
+void updateOrientationLabel() {
+  if (orientation_value) {
+    lv_label_set_text(orientation_value,
+                      displayFlipped() ? LV_SYMBOL_LOOP "  Flipped 180" : LV_SYMBOL_LOOP "  Normal");
+  }
+}
+
+void onToggleOrientation(lv_event_t*) {
+  setDisplayFlipped(!displayFlipped());
+  updateOrientationLabel();
 }
 
 // A titled card used to group related settings inside the tab.
@@ -109,9 +123,9 @@ void updatePeerLabel() {
   }
   FluidNCMachine machine;
   if (fluidnc.getMachine(0, machine)) {
-    lv_label_set_text_fmt(peer_label, LV_SYMBOL_WIFI "  %s", machine.label().c_str());
+    lv_label_set_text_fmt(peer_label, "%s", machine.label().c_str());
   } else {
-    lv_label_set_text(peer_label, LV_SYMBOL_WIFI "  No paired machine");
+    lv_label_set_text(peer_label, "No paired machine");
   }
 }
 
@@ -136,7 +150,7 @@ void createSettingsTab(lv_obj_t* tab) {
   lv_obj_add_style(peer_label, &style_muted, LV_PART_MAIN);
   lv_obj_set_width(peer_label, LV_PCT(100));
   lv_label_set_long_mode(peer_label, LV_LABEL_LONG_DOT);
-  lv_label_set_text(peer_label, LV_SYMBOL_WIFI "  No paired machine");
+  lv_label_set_text(peer_label, "No paired machine");
 
   lv_obj_t* conn_buttons = lv_obj_create(connection);
   lv_obj_remove_style_all(conn_buttons);
@@ -192,6 +206,25 @@ void createSettingsTab(lv_obj_t* tab) {
   updateBrightnessLabel();
 
   createStepButton(brightness_controls, LV_SYMBOL_PLUS, onBrightnessUp);
+
+  lv_obj_t* orientation_row = lv_obj_create(display);
+  lv_obj_remove_style_all(orientation_row);
+  lv_obj_set_size(orientation_row, LV_PCT(100), LV_SIZE_CONTENT);
+  lv_obj_set_flex_flow(orientation_row, LV_FLEX_FLOW_ROW);
+  lv_obj_set_flex_align(orientation_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+  lv_obj_clear_flag(orientation_row, LV_OBJ_FLAG_SCROLLABLE);
+
+  lv_obj_t* orientation_caption = lv_label_create(orientation_row);
+  lv_label_set_text(orientation_caption, "Orientation");
+  lv_obj_add_style(orientation_caption, &style_muted, LV_PART_MAIN);
+
+  lv_obj_t* orientation_button = lv_btn_create(orientation_row);
+  lv_obj_add_style(orientation_button, &style_button, LV_PART_MAIN);
+  lv_obj_set_size(orientation_button, 158, 34);
+  lv_obj_add_event_cb(orientation_button, onToggleOrientation, LV_EVENT_CLICKED, nullptr);
+  orientation_value = lv_label_create(orientation_button);
+  lv_obj_center(orientation_value);
+  updateOrientationLabel();
 
   // About
   lv_obj_t* about = createSection(tab, LV_SYMBOL_GPS, "About");
