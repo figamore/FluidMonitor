@@ -31,5 +31,5 @@ void loop() {
   pollShutdownControl();
   pollInactivity(machineAllowsSleep());
   lv_timer_handler();
-  delay(5);
+  delay(1);
 }

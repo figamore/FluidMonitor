@@ -9,7 +9,7 @@
 
 constexpr int kScreenWidth = 320;
 constexpr int kScreenHeight = 240;
-constexpr size_t kLvglBufferLines = 20;
+constexpr size_t kLvglBufferLines = 40;
 
 struct AxisTriplet {
   float x = 0;

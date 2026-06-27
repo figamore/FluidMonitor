@@ -12,6 +12,8 @@
 #define LV_MEM_SIZE (40U * 1024U)
 #define LV_TICK_CUSTOM 0
 #define LV_DPI_DEF 130
+#define LV_DEF_REFR_PERIOD 16
+#define LV_INDEV_DEF_READ_PERIOD 16
 
 #define LV_USE_LOG 0
 #define LV_USE_ASSERT_NULL 1
