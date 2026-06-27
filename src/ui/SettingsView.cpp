@@ -82,7 +82,45 @@ void onToggleOrientation(lv_event_t*) {
   updateOrientationLabel();
 }
 
-// A titled card used to group related settings inside the tab.
+lv_obj_t* inactivity_segments[3] = {};
+
+void updateInactivitySegments() {
+  for (uint8_t i = 0; i < 3; ++i) {
+    if (!inactivity_segments[i]) {
+      continue;
+    }
+    bool active = (i == inactivityMode());
+    lv_obj_set_style_bg_color(inactivity_segments[i], lv_color_hex(active ? 0x2563EB : 0x1B2430), LV_PART_MAIN);
+    lv_obj_set_style_text_color(inactivity_segments[i], lv_color_hex(active ? 0xFFFFFF : 0x93A4B7), LV_PART_MAIN);
+  }
+}
+
+void onInactivitySelect(lv_event_t* event) {
+  uint8_t mode = static_cast<uint8_t>(reinterpret_cast<uintptr_t>(lv_event_get_user_data(event)));
+  setInactivityMode(mode);
+  updateInactivitySegments();
+}
+
+void createInactivitySegment(lv_obj_t* parent, uint8_t index, const char* text, bool divider) {
+  lv_obj_t* segment = lv_btn_create(parent);
+  lv_obj_remove_style_all(segment);
+  lv_obj_set_size(segment, 0, LV_PCT(100));
+  lv_obj_set_flex_grow(segment, 1);
+  lv_obj_set_style_bg_opa(segment, LV_OPA_COVER, LV_PART_MAIN);
+  lv_obj_set_style_radius(segment, 0, LV_PART_MAIN);
+  if (divider) {
+    lv_obj_set_style_border_width(segment, 1, LV_PART_MAIN);
+    lv_obj_set_style_border_side(segment, LV_BORDER_SIDE_LEFT, LV_PART_MAIN);
+    lv_obj_set_style_border_color(segment, lv_color_hex(0x344151), LV_PART_MAIN);
+  }
+  lv_obj_add_event_cb(segment, onInactivitySelect, LV_EVENT_CLICKED, reinterpret_cast<void*>(static_cast<uintptr_t>(index)));
+
+  lv_obj_t* label = lv_label_create(segment);
+  lv_label_set_text(label, text);
+  lv_obj_center(label);
+  inactivity_segments[index] = segment;
+}
+
 lv_obj_t* createSection(lv_obj_t* parent, const char* icon, const char* title) {
   lv_obj_t* card = makePanel(parent);
   lv_obj_set_size(card, LV_PCT(100), LV_SIZE_CONTENT);
@@ -97,7 +135,6 @@ lv_obj_t* createSection(lv_obj_t* parent, const char* icon, const char* title) {
   return card;
 }
 
-// Compact square button used for the brightness +/- controls.
 lv_obj_t* createStepButton(lv_obj_t* parent, const char* symbol, lv_event_cb_t cb) {
   lv_obj_t* button = lv_btn_create(parent);
   lv_obj_add_style(button, &style_button, LV_PART_MAIN);
@@ -143,7 +180,6 @@ void createSettingsTab(lv_obj_t* tab) {
   lv_obj_set_scroll_dir(tab, LV_DIR_VER);
   lv_obj_set_scrollbar_mode(tab, LV_SCROLLBAR_MODE_OFF);
 
-  // Connection
   lv_obj_t* connection = createSection(tab, LV_SYMBOL_WIFI, "Connection");
 
   peer_label = lv_label_create(connection);
@@ -175,7 +211,6 @@ void createSettingsTab(lv_obj_t* tab) {
   lv_label_set_text(forget_label, LV_SYMBOL_TRASH "  Forget");
   lv_obj_center(forget_label);
 
-  // Display brightness
   lv_obj_t* display = createSection(tab, LV_SYMBOL_EYE_OPEN, "Display");
 
   lv_obj_t* brightness_row = lv_obj_create(display);
@@ -226,7 +261,33 @@ void createSettingsTab(lv_obj_t* tab) {
   lv_obj_center(orientation_value);
   updateOrientationLabel();
 
-  // About
+  lv_obj_t* inactivity_row = lv_obj_create(display);
+  lv_obj_remove_style_all(inactivity_row);
+  lv_obj_set_size(inactivity_row, LV_PCT(100), LV_SIZE_CONTENT);
+  lv_obj_set_flex_flow(inactivity_row, LV_FLEX_FLOW_ROW);
+  lv_obj_set_flex_align(inactivity_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+  lv_obj_clear_flag(inactivity_row, LV_OBJ_FLAG_SCROLLABLE);
+
+  lv_obj_t* inactivity_caption = lv_label_create(inactivity_row);
+  lv_label_set_text(inactivity_caption, "Inactivity");
+  lv_obj_add_style(inactivity_caption, &style_muted, LV_PART_MAIN);
+
+  lv_obj_t* inactivity_selector = lv_obj_create(inactivity_row);
+  lv_obj_remove_style_all(inactivity_selector);
+  lv_obj_set_size(inactivity_selector, 168, 34);
+  lv_obj_set_flex_flow(inactivity_selector, LV_FLEX_FLOW_ROW);
+  lv_obj_set_style_radius(inactivity_selector, 8, LV_PART_MAIN);
+  lv_obj_set_style_clip_corner(inactivity_selector, true, LV_PART_MAIN);
+  lv_obj_set_style_border_width(inactivity_selector, 1, LV_PART_MAIN);
+  lv_obj_set_style_border_color(inactivity_selector, lv_color_hex(0x344151), LV_PART_MAIN);
+  lv_obj_set_style_pad_all(inactivity_selector, 0, LV_PART_MAIN);
+  lv_obj_clear_flag(inactivity_selector, LV_OBJ_FLAG_SCROLLABLE);
+
+  createInactivitySegment(inactivity_selector, kInactivityDisplayOn, "On", false);
+  createInactivitySegment(inactivity_selector, kInactivityDim, "Dim", true);
+  createInactivitySegment(inactivity_selector, kInactivityDisplayOff, "Off", true);
+  updateInactivitySegments();
+
   lv_obj_t* about = createSection(tab, LV_SYMBOL_GPS, "About");
 
   units_label = lv_label_create(about);

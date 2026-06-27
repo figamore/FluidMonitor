@@ -12,19 +12,22 @@
 
 namespace {
 
-// Never let the backlight go fully dark, otherwise the screen looks dead and
-// the user cannot find the controls to turn it back up.
 constexpr uint8_t kMinBrightness = 24;
 constexpr char kPrefsNamespace[] = "fluidmon";
 constexpr char kPrefsBrightnessKey[] = "bright";
 constexpr char kPrefsFlipKey[] = "flip";
+constexpr char kPrefsInactivityKey[] = "inact";
 
-// Base landscape rotation; the 180-degree flip uses the opposite landscape.
 constexpr uint8_t kRotationNormal = 1;
 constexpr uint8_t kRotationFlipped = 3;
 
+constexpr uint32_t kInactivityTimeoutMs = 60000;
+
 uint8_t active_brightness = UI_ACTIVE_BRIGHTNESS;
 bool display_flipped = false;
+uint8_t inactivity_mode = kInactivityDim;
+uint32_t last_activity_ms = 0;
+bool display_sleeping = false;
 
 class LGFX : public lgfx::LGFX_Device {
   lgfx::Bus_SPI bus_;
@@ -115,8 +118,20 @@ lv_disp_draw_buf_t draw_buf;
 lv_color_t draw_buf_1[kScreenWidth * kLvglBufferLines];
 lv_color_t draw_buf_2[kScreenWidth * kLvglBufferLines];
 
-void touchActivity() {
-  gfx.setBrightness(active_brightness);
+uint8_t dimBrightness() {
+  uint8_t value = active_brightness / 5;
+  return value < 8 ? 8 : value;
+}
+
+// returns true if it woke the display
+bool noteActivity() {
+  last_activity_ms = millis();
+  if (display_sleeping) {
+    display_sleeping = false;
+    gfx.setBrightness(active_brightness);
+    return true;
+  }
+  return false;
 }
 
 void flushDisplay(lv_disp_drv_t* disp, const lv_area_t* area, lv_color_t* color_p) {
@@ -133,15 +148,17 @@ void readTouch(lv_indev_drv_t*, lv_indev_data_t* data) {
   uint16_t x = 0;
   uint16_t y = 0;
   if (gfx.getTouch(&x, &y)) {
+    // swallow the wake tap so it doesn't also press a control
+    if (noteActivity()) {
+      suppress_touch_until_release = true;
+    }
     if (suppress_touch_until_release) {
       data->state = LV_INDEV_STATE_REL;
-      touchActivity();
       return;
     }
     data->state = LV_INDEV_STATE_PR;
     data->point.x = x;
     data->point.y = y;
-    touchActivity();
   } else {
     suppress_touch_until_release = false;
     data->state = LV_INDEV_STATE_REL;
@@ -157,11 +174,16 @@ void initDisplay() {
   if (prefs.begin(kPrefsNamespace, true)) {
     active_brightness = prefs.getUChar(kPrefsBrightnessKey, UI_ACTIVE_BRIGHTNESS);
     display_flipped = prefs.getBool(kPrefsFlipKey, false);
+    inactivity_mode = prefs.getUChar(kPrefsInactivityKey, kInactivityDim);
     prefs.end();
   }
   if (active_brightness < kMinBrightness) {
     active_brightness = kMinBrightness;
   }
+  if (inactivity_mode > kInactivityDisplayOff) {
+    inactivity_mode = kInactivityDim;
+  }
+  last_activity_ms = millis();
   gfx.setRotation(display_flipped ? kRotationFlipped : kRotationNormal);
   gfx.setBrightness(active_brightness);
 
@@ -188,6 +210,8 @@ void setDisplayBrightness(uint8_t value) {
     value = kMinBrightness;
   }
   active_brightness = value;
+  display_sleeping = false;
+  last_activity_ms = millis();
   gfx.setBrightness(active_brightness);
 
   Preferences prefs;
@@ -211,10 +235,44 @@ void setDisplayFlipped(bool flipped) {
     prefs.end();
   }
 
-  // The framebuffer mapping changed under LVGL; force a full repaint.
   lv_obj_invalidate(lv_scr_act());
 }
 
 bool displayFlipped() {
   return display_flipped;
+}
+
+void setInactivityMode(uint8_t mode) {
+  if (mode > kInactivityDisplayOff) {
+    mode = kInactivityDim;
+  }
+  inactivity_mode = mode;
+  display_sleeping = false;
+  last_activity_ms = millis();
+  gfx.setBrightness(active_brightness);
+
+  Preferences prefs;
+  if (prefs.begin(kPrefsNamespace, false)) {
+    prefs.putUChar(kPrefsInactivityKey, inactivity_mode);
+    prefs.end();
+  }
+}
+
+uint8_t inactivityMode() {
+  return inactivity_mode;
+}
+
+void pollInactivity(bool machine_allows_sleep) {
+  if (inactivity_mode == kInactivityDisplayOn || !machine_allows_sleep) {
+    noteActivity();
+    return;
+  }
+  if (display_sleeping) {
+    return;
+  }
+  if (millis() - last_activity_ms < kInactivityTimeoutMs) {
+    return;
+  }
+  display_sleeping = true;
+  gfx.setBrightness(inactivity_mode == kInactivityDisplayOff ? 0 : dimBrightness());
 }

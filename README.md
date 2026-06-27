@@ -27,10 +27,20 @@ reconnects automatically.
 ## Settings
 
 The **Settings** tab (next to Actions) groups the **Connection** controls (Pair /
-Forget), a **Display** section with brightness adjustment and a 180-degree
-**Orientation** flip (both persisted to NVS and reapplied on boot), and an
-**About** section showing the active units. On shutdown-enabled builds it also
-hosts the **Shutdown** button.
+Forget), a **Display** section, and an **About** section showing the active
+units. On shutdown-enabled builds it also hosts the **Shutdown** button.
+
+The **Display** section offers:
+
+- **Brightness** adjustment.
+- **Orientation** — a 180-degree flip of the screen and touch.
+- **Inactivity** — what the backlight does after 60 seconds of no touch: stay
+  **On**, **Dim** (default), or turn **Off**. It only triggers while the machine
+  is idle or no machine is connected, never during a running job, and any tap
+  wakes the screen. The first wake tap is swallowed so it does not also press a
+  control.
+
+All three settings persist to NVS and are reapplied on boot.
 
 ## License
 

@@ -5,3 +5,6 @@
 
 void initFluidLink();
 void pollFluidLink();
+
+// True when the display may sleep: the machine is idle, or none is connected.
+bool machineAllowsSleep();

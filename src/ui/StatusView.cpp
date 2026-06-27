@@ -21,8 +21,6 @@ void updateStatusModeButtons() {
   styleSegment(coord_machine_button, status_show_machine);
 }
 
-// One half of the Work/Mach segmented toggle. The buttons sit flush inside a
-// rounded, clipped container so together they read as a single control.
 lv_obj_t* createSegment(lv_obj_t* parent, const char* text, lv_event_cb_t cb, bool divider) {
   lv_obj_t* segment = lv_btn_create(parent);
   lv_obj_remove_style_all(segment);

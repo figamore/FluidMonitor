@@ -496,9 +496,6 @@ void createUi() {
   createActionsTab(actions_tab);
   createSettingsTab(settings_tab);
 
-  // Tab buttons are a button matrix that defaults to equal widths, which leaves
-  // the short "Jog" label looking cramped. Weight each button so it sizes
-  // roughly to its label instead.
   lv_btnmatrix_set_btn_width(tab_btns, 0, 8);   // Status
   lv_btnmatrix_set_btn_width(tab_btns, 1, 7);   // Jog
   lv_btnmatrix_set_btn_width(tab_btns, 2, 9);   // Actions

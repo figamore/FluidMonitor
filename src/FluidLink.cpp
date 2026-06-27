@@ -77,3 +77,7 @@ void initFluidLink() {
 void pollFluidLink() {
   fluidnc.poll();
 }
+
+bool machineAllowsSleep() {
+  return !fluidnc.isConnected() || fluidnc.isIdle();
+}

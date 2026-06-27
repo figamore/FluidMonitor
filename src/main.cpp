@@ -29,6 +29,7 @@ void loop() {
   pollFluidLink();
   applyDro();
   pollShutdownControl();
+  pollInactivity(machineAllowsSleep());
   lv_timer_handler();
   delay(5);
 }
