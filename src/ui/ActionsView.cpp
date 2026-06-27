@@ -37,9 +37,9 @@ void createActionsTab(lv_obj_t* tab) {
   lv_obj_set_flex_align(row_one, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
   lv_obj_clear_flag(row_one, LV_OBJ_FLAG_SCROLLABLE);
 
-  createSmallButton(row_one, "Zero X", onCommandAction, const_cast<char*>("G10L20P0X0"));
-  createSmallButton(row_one, "Zero Y", onCommandAction, const_cast<char*>("G10L20P0Y0"));
-  createSmallButton(row_one, "Zero Z", onCommandAction, const_cast<char*>("G10L20P0Z0"));
+  createZeroButton(row_one, nullptr, " X", onCommandAction, const_cast<char*>("G10L20P0X0"));
+  createZeroButton(row_one, nullptr, " Y", onCommandAction, const_cast<char*>("G10L20P0Y0"));
+  createZeroButton(row_one, nullptr, " Z", onCommandAction, const_cast<char*>("G10L20P0Z0"));
 
   lv_obj_t* row_two = lv_obj_create(tab);
   lv_obj_remove_style_all(row_two);

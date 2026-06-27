@@ -16,3 +16,5 @@ void setStateLabel(const char* text);
 void formatAxis(lv_obj_t* label, const char* axis, float value);
 lv_obj_t* makePanel(lv_obj_t* parent);
 lv_obj_t* createSmallButton(lv_obj_t* parent, const char* text, lv_event_cb_t cb, void* user_data);
+lv_obj_t* createZeroButton(lv_obj_t* parent, const char* leading, const char* trailing, lv_event_cb_t cb,
+                           void* user_data);

@@ -423,6 +423,44 @@ lv_obj_t* createSmallButton(lv_obj_t* parent, const char* text, lv_event_cb_t cb
   return button;
 }
 
+static lv_obj_t* makeRowLabel(lv_obj_t* row, const char* text) {
+  lv_obj_t* label = lv_label_create(row);
+  lv_label_set_text(label, text);
+  lv_obj_set_style_text_font(label, &lv_font_montserrat_16, LV_PART_MAIN);
+  return label;
+}
+
+lv_obj_t* createZeroButton(lv_obj_t* parent, const char* leading, const char* trailing, lv_event_cb_t cb,
+                           void* user_data) {
+  lv_obj_t* button = lv_btn_create(parent);
+  lv_obj_add_style(button, &style_button, LV_PART_MAIN);
+  lv_obj_set_size(button, 78, 44);
+  lv_obj_add_event_cb(button, cb, LV_EVENT_CLICKED, user_data);
+
+  lv_obj_t* row = lv_obj_create(button);
+  lv_obj_remove_style_all(row);
+  lv_obj_set_size(row, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+  lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
+  lv_obj_set_flex_align(row, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+  lv_obj_clear_flag(row, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_center(row);
+
+  if (leading) {
+    makeRowLabel(row, leading);
+  }
+
+  // slashed zero: a "/" laid over a "0"
+  lv_obj_t* zero_box = lv_obj_create(row);
+  lv_obj_remove_style_all(zero_box);
+  lv_obj_set_size(zero_box, 11, 20);
+  lv_obj_clear_flag(zero_box, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_center(makeRowLabel(zero_box, "0"));
+  lv_obj_center(makeRowLabel(zero_box, "/"));
+
+  makeRowLabel(row, trailing);
+  return button;
+}
+
 void createUi() {
   initStyles();
 
