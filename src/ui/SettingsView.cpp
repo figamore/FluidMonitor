@@ -202,7 +202,7 @@ void createSettingsTab(lv_obj_t* tab) {
   lv_obj_set_size(pair_button, 138, 40);
   lv_obj_add_event_cb(pair_button, onPair, LV_EVENT_CLICKED, nullptr);
   pair_label = lv_label_create(pair_button);
-  lv_label_set_text(pair_label, LV_SYMBOL_BLUETOOTH "  Pair");
+  lv_label_set_text(pair_label, LV_SYMBOL_SHUFFLE "  Pair");
   lv_obj_center(pair_label);
 
   lv_obj_t* forget = lv_btn_create(conn_buttons);

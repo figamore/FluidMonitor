@@ -514,7 +514,7 @@ void createUi() {
   lv_obj_set_style_bg_color(status_dot, lv_color_hex(0x38BDF8), LV_PART_MAIN);
 
   state_label = lv_label_create(left);
-  lv_label_set_text(state_label, "State: --");
+  lv_label_set_text(state_label, "Disconnected");
   lv_obj_set_style_text_font(state_label, &lv_font_montserrat_18, LV_PART_MAIN);
   lv_obj_set_style_text_color(state_label, lv_color_hex(0x67E8F9), LV_PART_MAIN);
 
@@ -540,7 +540,7 @@ void createUi() {
   lv_obj_set_style_bg_color(tab_btns, lv_color_hex(0x2563EB), LV_PART_ITEMS | LV_STATE_CHECKED);
 
   lv_obj_t* status_tab = lv_tabview_add_tab(tabs, LV_SYMBOL_GPS " Status");
-  lv_obj_t* jog_tab = lv_tabview_add_tab(tabs, LV_SYMBOL_SHUFFLE " Jog");
+  lv_obj_t* jog_tab = lv_tabview_add_tab(tabs, LV_SYMBOL_LOOP " Jog");
   lv_obj_t* actions_tab = lv_tabview_add_tab(tabs, LV_SYMBOL_LIST " Actions");
   lv_obj_t* settings_tab = lv_tabview_add_tab(tabs, LV_SYMBOL_SETTINGS " Settings");
   createStatusTab(status_tab);
@@ -565,7 +565,7 @@ void applyDro() {
   pending_dro = false;
 
   char stateText[32];
-  snprintf(stateText, sizeof(stateText), "State: %.11s", latest_dro.state[0] ? latest_dro.state : "--");
+  snprintf(stateText, sizeof(stateText), "%.11s", latest_dro.state[0] ? latest_dro.state : "Disconnected");
   lv_label_set_text(state_label, stateText);
   updateStatusLabels();
   lv_label_set_text(units_label, latest_dro.inch ? "Units: in" : "Units: mm");
