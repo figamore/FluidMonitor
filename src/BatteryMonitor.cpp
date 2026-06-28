@@ -5,17 +5,20 @@
 
 #include <Arduino.h>
 
+#include "Display.h"
 #include "app_config.h"
 
 void initBatteryMonitor() {
 #if CYD_BATTERY_ADC
-  analogSetPinAttenuation(CYD_BATTERY_ADC_PIN, ADC_11db);
+  if (batteryAvailable()) {
+    analogSetPinAttenuation(CYD_BATTERY_ADC_PIN, ADC_11db);
+  }
 #endif
 }
 
 bool batteryAvailable() {
 #if CYD_BATTERY_ADC && CYD_BOARD_CAPACITIVE
-  return true;
+  return displaySupportsBattery();
 #else
   return false;
 #endif
