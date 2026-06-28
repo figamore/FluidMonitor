@@ -184,6 +184,8 @@ void createSettingsTab(lv_obj_t* tab) {
 
   peer_label = lv_label_create(connection);
   lv_obj_add_style(peer_label, &style_muted, LV_PART_MAIN);
+  lv_obj_set_style_text_font(peer_label, &lv_font_montserrat_16, LV_PART_MAIN);
+  lv_obj_set_style_text_color(peer_label, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
   lv_obj_set_width(peer_label, LV_PCT(100));
   lv_label_set_long_mode(peer_label, LV_LABEL_LONG_DOT);
   lv_label_set_text(peer_label, "No paired machine");
@@ -223,6 +225,8 @@ void createSettingsTab(lv_obj_t* tab) {
   lv_obj_t* brightness_caption = lv_label_create(brightness_row);
   lv_label_set_text(brightness_caption, "Brightness");
   lv_obj_add_style(brightness_caption, &style_muted, LV_PART_MAIN);
+  lv_obj_set_style_text_font(brightness_caption, &lv_font_montserrat_16, LV_PART_MAIN);
+  lv_obj_set_style_text_color(brightness_caption, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
 
   lv_obj_t* brightness_controls = lv_obj_create(brightness_row);
   lv_obj_remove_style_all(brightness_controls);
@@ -252,6 +256,8 @@ void createSettingsTab(lv_obj_t* tab) {
   lv_obj_t* orientation_caption = lv_label_create(orientation_row);
   lv_label_set_text(orientation_caption, "Orientation");
   lv_obj_add_style(orientation_caption, &style_muted, LV_PART_MAIN);
+  lv_obj_set_style_text_font(orientation_caption, &lv_font_montserrat_16, LV_PART_MAIN);
+  lv_obj_set_style_text_color(orientation_caption, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
 
   lv_obj_t* orientation_button = lv_btn_create(orientation_row);
   lv_obj_add_style(orientation_button, &style_button, LV_PART_MAIN);
@@ -271,6 +277,8 @@ void createSettingsTab(lv_obj_t* tab) {
   lv_obj_t* inactivity_caption = lv_label_create(inactivity_row);
   lv_label_set_text(inactivity_caption, "Inactivity");
   lv_obj_add_style(inactivity_caption, &style_muted, LV_PART_MAIN);
+  lv_obj_set_style_text_font(inactivity_caption, &lv_font_montserrat_16, LV_PART_MAIN);
+  lv_obj_set_style_text_color(inactivity_caption, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
 
   lv_obj_t* inactivity_selector = lv_obj_create(inactivity_row);
   lv_obj_remove_style_all(inactivity_selector);
@@ -293,6 +301,8 @@ void createSettingsTab(lv_obj_t* tab) {
   units_label = lv_label_create(about);
   lv_label_set_text(units_label, "Units: mm");
   lv_obj_add_style(units_label, &style_muted, LV_PART_MAIN);
+  lv_obj_set_style_text_font(units_label, &lv_font_montserrat_16, LV_PART_MAIN);
+  lv_obj_set_style_text_color(units_label, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
 
   lv_obj_t* about_app = lv_label_create(about);
   lv_label_set_text(about_app, "FluidMonitor " LV_SYMBOL_BULLET " ESP-NOW DRO");
