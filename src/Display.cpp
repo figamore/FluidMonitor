@@ -12,6 +12,7 @@
 #include "AppState.h"
 #include "app_config.h"
 #include "generated/fluidNC_logo_png.h"
+#include "generated/version.h"
 
 namespace {
 
@@ -741,6 +742,11 @@ void drawSplash() {
                   kFluidNCLogoWidth,
                   kFluidNCLogoHeight,
                   reinterpret_cast<const lgfx::rgb565_t*>(kFluidNCLogoPixels));
+
+    gfx.setTextColor(gfx.color565(150, 158, 170), TFT_BLACK);
+    gfx.setTextDatum(middle_center);
+    gfx.setTextSize(1);
+    gfx.drawString((String("Firmware v") + kAppVersion).c_str(), kScreenWidth / 2, y + kFluidNCLogoHeight + 18);
   }
 
   if (!can_draw_logo) {
@@ -748,6 +754,9 @@ void drawSplash() {
     gfx.setTextDatum(middle_center);
     gfx.setTextSize(3);
     gfx.drawString("FluidNC", kScreenWidth / 2, kScreenHeight / 2);
+    gfx.setTextColor(gfx.color565(150, 158, 170), TFT_BLACK);
+    gfx.setTextSize(1);
+    gfx.drawString((String("v") + kAppVersion).c_str(), kScreenWidth / 2, kScreenHeight / 2 + 34);
   }
 
   delay(UI_SPLASH_MS);

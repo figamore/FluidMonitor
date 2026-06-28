@@ -6,6 +6,7 @@
 #include "../AppState.h"
 #include "../Display.h"
 #include "Ui.h"
+#include "generated/version.h"
 
 namespace {
 
@@ -305,7 +306,7 @@ void createSettingsTab(lv_obj_t* tab) {
   lv_obj_set_style_text_color(units_label, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
 
   lv_obj_t* about_app = lv_label_create(about);
-  lv_label_set_text(about_app, "FluidMonitor " LV_SYMBOL_BULLET " ESP-NOW DRO");
+  lv_label_set_text_fmt(about_app, "FluidMonitor v%s " LV_SYMBOL_BULLET " ESP-NOW", kAppVersion);
   lv_obj_add_style(about_app, &style_muted, LV_PART_MAIN);
 
 #if FLUIDMONITOR_ENABLE_SHUTDOWN
