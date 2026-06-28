@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FluidMonitor - Installer</title>
+    <meta
+      name="description"
+      content="Flash FluidMonitor firmware onto a supported ESP32 Cheap Yellow Display from your browser."
+    />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/figamore/FluidMonitor/main/assets/fluidnc-logo.png" />
+
+    <meta property="og:title" content="FluidMonitor - Installer" />
+    <meta property="og:description" content="Flash the FluidNC ESP-NOW DRO monitor from Chrome or Edge." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://raw.githubusercontent.com/figamore/FluidMonitor/main/assets/fluidnc-logo.png" />
+
+    <script
+      type="module"
+      src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"
+    ></script>
+
+    <style>
+      :root {
+        color-scheme: light;
+
+        --bg: #ffffff;
+        --bg-soft: #f6f6f5;
+        --text: #18181b;
+        --muted: #57575e;
+        --faint: #8c8c95;
+        --border: #e6e5e2;
+        --border-strong: #d6d5d1;
+
+        --ink: #18181b;
+        --ink-hover: #000000;
+
+        --accent: #b45309;
+        --accent-soft: #fff7ed;
+        --accent-line: #f59e0b;
+
+        --ok: #15803d;
+        --danger: #b91c1c;
+
+        --radius: 14px;
+        --radius-sm: 10px;
+        --maxw: 60rem;
+
+        --font: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, sans-serif;
+        --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font);
+        font-size: 16px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+
+      a {
+        color: var(--accent);
+        text-underline-offset: 0.16em;
+      }
+      a:hover {
+        color: var(--ink);
+      }
+
+      :focus-visible {
+        outline: 2px solid var(--accent-line);
+        outline-offset: 2px;
+        border-radius: 4px;
+      }
+
+      .wrap {
+        width: min(var(--maxw), calc(100% - 2.5rem));
+        margin-inline: auto;
+      }
+
+      /* ---------- Header ---------- */
+      header {
+        border-bottom: 1px solid var(--border);
+      }
+      header .wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        height: 3.75rem;
+      }
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-weight: 650;
+        color: var(--text);
+        text-decoration: none;
+        letter-spacing: -0.01em;
+      }
+      .gh {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: var(--muted);
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-decoration: none;
+      }
+      .gh:hover {
+        color: var(--text);
+      }
+      .gh svg {
+        width: 17px;
+        height: 17px;
+      }
+
+      /* ---------- Hero / installer ---------- */
+      .hero {
+        max-width: 38rem;
+        margin-inline: auto;
+        padding: clamp(3rem, 9vw, 5.5rem) 0 clamp(2.5rem, 6vw, 4rem);
+        text-align: center;
+      }
+      .works-with {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0 0 1.4rem;
+        padding: 0.4rem 0.9rem;
+        border: 1px solid var(--border-strong);
+        border-radius: 999px;
+        background: var(--bg-soft);
+        color: var(--muted);
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+      .works-with img {
+        height: 18px;
+        width: auto;
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(2.1rem, 6vw, 3rem);
+        line-height: 1.07;
+        letter-spacing: -0.03em;
+        font-weight: 800;
+      }
+      .sub {
+        margin: 0.9rem auto 0;
+        max-width: 30rem;
+        color: var(--muted);
+        font-size: 1.1rem;
+      }
+
+      /* the install card is the focal point */
+      .installer {
+        margin: 2.25rem auto 0;
+        max-width: 27rem;
+        padding: 1.25rem;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 12px 28px -16px rgba(0, 0, 0, 0.25);
+      }
+
+      esp-web-install-button {
+        --esp-tools-button-color: var(--ink);
+        --esp-tools-button-text-color: #fff;
+        --esp-tools-button-border-radius: 12px;
+        display: block;
+      }
+      esp-web-install-button:not(:defined) [slot="unsupported"],
+      esp-web-install-button:not(:defined) [slot="not-allowed"] {
+        display: none;
+      }
+
+      .install-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.6rem;
+        width: 100%;
+        min-height: 3.4rem;
+        padding: 0 1.5rem;
+        border: 0;
+        border-radius: 12px;
+        background: var(--ink);
+        color: #fff;
+        font: inherit;
+        font-size: 1.08rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        cursor: pointer;
+        transition: background 0.15s ease, transform 0.1s ease;
+      }
+      .install-btn:hover {
+        background: var(--ink-hover);
+      }
+      .install-btn:active {
+        transform: translateY(1px);
+      }
+      .install-btn svg {
+        width: 18px;
+        height: 18px;
+        flex: none;
+      }
+
+      .slot-msg {
+        display: block;
+        padding: 0.8rem 0.95rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-align: left;
+      }
+      .slot-msg.unsupported {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: var(--danger);
+      }
+      .slot-msg.not-allowed {
+        background: var(--accent-soft);
+        border: 1px solid #fed7aa;
+        color: var(--accent);
+      }
+
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem 0.85rem;
+        margin: 0.95rem 0 0;
+        color: var(--faint);
+        font-size: 0.85rem;
+      }
+      .meta .sep {
+        color: var(--border-strong);
+      }
+      #release-status[data-state="ok"] {
+        color: var(--muted);
+      }
+      #release-status b {
+        color: var(--text);
+        font-weight: 600;
+      }
+      .install-note {
+        margin: 0.65rem 0 0;
+        color: var(--faint);
+        font-size: 0.82rem;
+        line-height: 1.4;
+      }
+
+      /* ---------- Steps ---------- */
+      .steps-section {
+        background: var(--bg-soft);
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        padding: clamp(2.25rem, 5vw, 3.25rem) 0;
+      }
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.75rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        counter-reset: step;
+      }
+      @media (max-width: 680px) {
+        .steps {
+          grid-template-columns: 1fr;
+          gap: 1.25rem;
+        }
+      }
+      .steps li {
+        counter-increment: step;
+      }
+      .steps li::before {
+        content: counter(step);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.85rem;
+        height: 1.85rem;
+        margin-bottom: 0.7rem;
+        border-radius: 50%;
+        border: 1.5px solid var(--accent-line);
+        color: var(--accent);
+        font-weight: 700;
+        font-size: 0.9rem;
+      }
+      .steps h3 {
+        margin: 0 0 0.25rem;
+        font-size: 1rem;
+        font-weight: 650;
+      }
+      .steps p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.93rem;
+      }
+      .steps kbd {
+        font-family: var(--mono);
+        font-size: 0.82em;
+        padding: 0.05em 0.4em;
+        border: 1px solid var(--border-strong);
+        border-bottom-width: 2px;
+        border-radius: 5px;
+        background: var(--bg);
+      }
+
+      /* ---------- Footer ---------- */
+      footer {
+        border-top: 1px solid var(--border);
+        padding: 1.75rem 0;
+      }
+      footer .wrap {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem 1.25rem;
+        color: var(--faint);
+        font-size: 0.88rem;
+      }
+      footer .links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.1rem;
+      }
+      footer a {
+        color: var(--muted);
+        text-decoration: none;
+      }
+      footer a:hover {
+        color: var(--text);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        * {
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <div class="wrap">
+        <a class="brand" href="#top">FluidMonitor</a>
+        <a class="gh" href="https://github.com/figamore/FluidMonitor" rel="noopener">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+          </svg>
+          GitHub
+        </a>
+      </div>
+    </header>
+
+    <main id="top">
+      <!-- Installer first -->
+      <section class="wrap hero">
+        <p class="works-with">
+          Works with
+          <img src="https://raw.githubusercontent.com/figamore/FluidMonitor/main/assets/fluidnc-logo.png" alt="FluidNC" />
+        </p>
+        <h1>Install FluidMonitor</h1>
+        <p class="sub">
+          A touch DRO monitor for FluidNC over ESP-NOW. Flash it onto a supported ESP32
+          Cheap Yellow Display directly from the browser.
+        </p>
+
+        <div class="installer">
+          <esp-web-install-button manifest="manifest.json">
+            <button class="install-btn" slot="activate">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+              Install
+            </button>
+            <span class="slot-msg unsupported" slot="unsupported">
+              This browser doesn't support Web Serial. Open this page in Chrome or Edge on a desktop computer.
+            </span>
+            <span class="slot-msg not-allowed" slot="not-allowed">
+              Web Serial needs a secure connection. Use the HTTPS link, not a local file.
+            </span>
+          </esp-web-install-button>
+
+          <p class="meta">
+            <span id="release-status" data-state="loading">Checking latest release…</span>
+            <span class="sep">·</span>
+            <span>Ensure a supported CYD is connected via USB</span>
+          </p>
+          <p class="install-note">
+            The installer performs a clean flash for reliable setup. Saved settings on the device may be reset.
+          </p>
+        </div>
+      </section>
+
+      <!-- How to flash -->
+      <section class="steps-section">
+        <div class="wrap">
+          <ol class="steps">
+            <li>
+              <h3>Connect</h3>
+              <p>Plug the CYD into your computer with a data-capable USB cable.</p>
+            </li>
+            <li>
+              <h3>Install</h3>
+              <p>Click <strong>Install</strong>, choose the ESP32 serial port, then wait for the flash to finish. On resistive boards, tap the on-screen target when prompted.</p>
+            </li>
+            <li>
+              <h3>Pair</h3>
+              <p>Enable <strong>ESP-NOW</strong> on your FluidNC controller, then open the <kbd>Settings</kbd> tab and tap <strong>Pair</strong> to link them.</p>
+            </li>
+          </ol>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <span>© figamore 2026</span>
+        <span class="links">
+          <a href="https://github.com/figamore/FluidMonitor" rel="noopener">GitHub</a>
+          <a href="https://esphome.github.io/esp-web-tools/" rel="noopener">ESP Web Tools</a>
+        </span>
+      </div>
+    </footer>
+
+    <script>
+      (async function showRelease() {
+        const el = document.querySelector("#release-status");
+        if (!el) return;
+        try {
+          const res = await fetch("release.json", { cache: "no-store" });
+          if (!res.ok) throw new Error("unavailable");
+          const release = await res.json();
+          const label = release.name || release.tag_name || "Latest";
+          el.dataset.state = "ok";
+          el.replaceChildren(document.createTextNode("Firmware "));
+          const strong = document.createElement("b");
+          strong.textContent = label;
+          el.appendChild(strong);
+        } catch (err) {
+          el.dataset.state = "idle";
+          el.textContent = "";
+        }
+      })();
+    </script>
+  </body>
+</html>
