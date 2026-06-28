@@ -8,6 +8,8 @@
 #include "Display.h"
 #include "FluidLink.h"
 #include "ui/Ui.h"
+#include "generated/fluidNC_logo_png.h"
+
 
 void setup() {
   Serial.begin(115200);

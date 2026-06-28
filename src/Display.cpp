@@ -9,6 +9,8 @@
 
 #include "AppState.h"
 #include "app_config.h"
+#include "generated/fluidNC_logo_png.h"
+
 
 namespace {
 
@@ -185,6 +187,33 @@ bool touchDragging() {
   return touch_dragged;
 }
 
+void drawSplash() {
+  gfx.fillScreen(TFT_BLACK);
+
+  const bool can_draw_logo = kFluidNCLogoPixelCount == kFluidNCLogoWidth * kFluidNCLogoHeight &&
+                             kFluidNCLogoWidth <= kScreenWidth &&
+                             kFluidNCLogoHeight <= kScreenHeight;
+  if (can_draw_logo) {
+    const int32_t x = (kScreenWidth - kFluidNCLogoWidth) / 2;
+    const int32_t y = (kScreenHeight - kFluidNCLogoHeight) / 2;
+    gfx.pushImage(x,
+                  y,
+                  kFluidNCLogoWidth,
+                  kFluidNCLogoHeight,
+                  reinterpret_cast<const lgfx::rgb565_t*>(kFluidNCLogoPixels));
+  }
+
+  if (!can_draw_logo) {
+    gfx.setTextColor(TFT_WHITE, TFT_BLACK);
+    gfx.setTextDatum(middle_center);
+    gfx.setTextSize(3);
+    gfx.drawString("FluidNC", kScreenWidth / 2, kScreenHeight / 2);
+  }
+
+  delay(UI_SPLASH_MS);
+  gfx.fillScreen(TFT_BLACK);
+}
+
 void initDisplay() {
   gfx.init();
 
@@ -204,6 +233,12 @@ void initDisplay() {
   last_activity_ms = millis();
   gfx.setRotation(display_flipped ? kRotationFlipped : kRotationNormal);
   gfx.setBrightness(active_brightness);
+
+  #if UI_SPLASH_MS > 0
+    Serial.println("Display splash: FluidNC logo");
+    drawSplash();
+  #endif
+
 
   lv_init();
   lv_disp_draw_buf_init(&draw_buf, draw_buf_1, nullptr, kScreenWidth * kLvglBufferLines);
