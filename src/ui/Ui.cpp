@@ -411,10 +411,23 @@ lv_obj_t* makePanel(lv_obj_t* parent) {
   return panel;
 }
 
+static void addPressFeedback(lv_obj_t* button) {
+  lv_obj_set_style_bg_color(button, lv_color_hex(0x2E4256), LV_PART_MAIN | LV_STATE_PRESSED);
+  lv_obj_set_style_transform_width(button, -2, LV_PART_MAIN | LV_STATE_PRESSED);
+  lv_obj_set_style_transform_height(button, -2, LV_PART_MAIN | LV_STATE_PRESSED);
+}
+
+void accentButton(lv_obj_t* button, lv_color_t color) {
+  lv_obj_set_style_text_color(button, color, LV_PART_MAIN);
+  lv_obj_set_style_border_color(button, color, LV_PART_MAIN);
+  lv_obj_set_style_border_width(button, 2, LV_PART_MAIN);
+}
+
 lv_obj_t* createSmallButton(lv_obj_t* parent, const char* text, lv_event_cb_t cb, void* user_data) {
   lv_obj_t* button = lv_btn_create(parent);
   lv_obj_add_style(button, &style_button, LV_PART_MAIN);
   lv_obj_set_size(button, 78, 44);
+  addPressFeedback(button);
   lv_obj_add_event_cb(button, cb, LV_EVENT_CLICKED, user_data);
   lv_obj_t* label = lv_label_create(button);
   lv_label_set_text(label, text);
@@ -435,6 +448,7 @@ lv_obj_t* createZeroButton(lv_obj_t* parent, const char* leading, const char* tr
   lv_obj_t* button = lv_btn_create(parent);
   lv_obj_add_style(button, &style_button, LV_PART_MAIN);
   lv_obj_set_size(button, 78, 44);
+  addPressFeedback(button);
   lv_obj_add_event_cb(button, cb, LV_EVENT_CLICKED, user_data);
 
   lv_obj_t* row = lv_obj_create(button);

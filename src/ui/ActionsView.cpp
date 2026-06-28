@@ -25,8 +25,9 @@ void onCommandAction(lv_event_t* event) {
 
 void createActionsTab(lv_obj_t* tab) {
   lv_obj_set_flex_flow(tab, LV_FLEX_FLOW_COLUMN);
+  lv_obj_set_flex_align(tab, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
   lv_obj_set_style_pad_all(tab, 10, LV_PART_MAIN);
-  lv_obj_set_style_pad_row(tab, 10, LV_PART_MAIN);
+  lv_obj_set_style_pad_row(tab, 12, LV_PART_MAIN);
   lv_obj_set_scrollbar_mode(tab, LV_SCROLLBAR_MODE_OFF);
   lv_obj_clear_flag(tab, LV_OBJ_FLAG_SCROLLABLE);
 
@@ -37,9 +38,12 @@ void createActionsTab(lv_obj_t* tab) {
   lv_obj_set_flex_align(row_one, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
   lv_obj_clear_flag(row_one, LV_OBJ_FLAG_SCROLLABLE);
 
-  createZeroButton(row_one, nullptr, " X", onCommandAction, const_cast<char*>("G10L20P0X0"));
-  createZeroButton(row_one, nullptr, " Y", onCommandAction, const_cast<char*>("G10L20P0Y0"));
-  createZeroButton(row_one, nullptr, " Z", onCommandAction, const_cast<char*>("G10L20P0Z0"));
+  accentButton(createZeroButton(row_one, nullptr, " X", onCommandAction, const_cast<char*>("G10L20P0X0")),
+               lv_color_hex(0xF87171));
+  accentButton(createZeroButton(row_one, nullptr, " Y", onCommandAction, const_cast<char*>("G10L20P0Y0")),
+               lv_color_hex(0x34D399));
+  accentButton(createZeroButton(row_one, nullptr, " Z", onCommandAction, const_cast<char*>("G10L20P0Z0")),
+               lv_color_hex(0x60A5FA));
 
   lv_obj_t* row_two = lv_obj_create(tab);
   lv_obj_remove_style_all(row_two);
