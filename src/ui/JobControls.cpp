@@ -50,20 +50,24 @@ int activeJobPercent() {
   return percent;
 }
 
-void onJobPause(lv_event_t* event) {
+void onJobPauseToggle(lv_event_t* event) {
   if (lv_event_get_code(event) != LV_EVENT_CLICKED) {
     return;
   }
   cancelJog();
-  markSendResult(fluidnc.feedHold());
+  markSendResult(machineJobPaused() ? fluidnc.cycleStart() : fluidnc.feedHold());
 }
 
-void onJobResume(lv_event_t* event) {
-  if (lv_event_get_code(event) != LV_EVENT_CLICKED) {
+void updateJobPauseButton(lv_obj_t* button) {
+  if (!button) {
     return;
   }
-  cancelJog();
-  markSendResult(fluidnc.cycleStart());
+  const bool paused = machineJobPaused();
+  lv_obj_t* label = lv_obj_get_child(button, 0);
+  if (label) {
+    lv_label_set_text(label, paused ? LV_SYMBOL_PLAY : LV_SYMBOL_PAUSE);
+  }
+  accentButton(button, lv_color_hex(paused ? Colors::kStatusSuccess : Colors::kStatusWarning));
 }
 
 void onJobAbort(lv_event_t* event) {
@@ -72,12 +76,4 @@ void onJobAbort(lv_event_t* event) {
   }
   cancelJog();
   markSendResult(fluidnc.stopFile());
-}
-
-void onJobEStop(lv_event_t* event) {
-  if (lv_event_get_code(event) != LV_EVENT_CLICKED) {
-    return;
-  }
-  cancelJog();
-  markSendResult(fluidnc.softReset());
 }

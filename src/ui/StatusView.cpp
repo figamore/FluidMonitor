@@ -12,6 +12,7 @@ namespace {
 
 lv_obj_t* status_panel = nullptr;
 lv_obj_t* status_job_controls = nullptr;
+lv_obj_t* status_pause_btn = nullptr;
 lv_obj_t* status_job_progress_row = nullptr;
 lv_obj_t* status_job_progress = nullptr;
 lv_obj_t* status_job_track = nullptr;
@@ -72,7 +73,8 @@ void onStatusMachine(lv_event_t* event) {
 
 lv_obj_t* createStatusJobButton(lv_obj_t* parent, const char* text, lv_event_cb_t cb, uint32_t color) {
   lv_obj_t* button = createSmallButton(parent, text, cb, nullptr);
-  lv_obj_set_size(button, 38, 30);
+  lv_obj_set_height(button, 30);
+  lv_obj_set_flex_grow(button, 1);
   accentButton(button, lv_color_hex(color));
   return button;
 }
@@ -130,6 +132,7 @@ void updateStatusJobControls() {
   if (status_job_controls) {
     if (visible) {
       lv_obj_clear_flag(status_job_controls, LV_OBJ_FLAG_HIDDEN);
+      updateJobPauseButton(status_pause_btn);
     } else {
       lv_obj_add_flag(status_job_controls, LV_OBJ_FLAG_HIDDEN);
     }
@@ -227,12 +230,11 @@ void createStatusTab(lv_obj_t* tab) {
   lv_obj_remove_style_all(status_job_controls);
   lv_obj_set_size(status_job_controls, LV_PCT(100), 32);
   lv_obj_set_flex_flow(status_job_controls, LV_FLEX_FLOW_ROW);
-  lv_obj_set_flex_align(status_job_controls, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+  lv_obj_set_flex_align(status_job_controls, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+  lv_obj_set_style_pad_column(status_job_controls, 8, LV_PART_MAIN);
   lv_obj_clear_flag(status_job_controls, LV_OBJ_FLAG_SCROLLABLE);
-  createStatusJobButton(status_job_controls, LV_SYMBOL_PAUSE, onJobPause, Colors::kStatusWarning);
-  createStatusJobButton(status_job_controls, LV_SYMBOL_PLAY, onJobResume, Colors::kStatusSuccess);
+  status_pause_btn = createStatusJobButton(status_job_controls, LV_SYMBOL_PAUSE, onJobPauseToggle, Colors::kStatusWarning);
   createStatusJobButton(status_job_controls, LV_SYMBOL_STOP, onJobAbort, Colors::kStatusError);
-  createStatusJobButton(status_job_controls, LV_SYMBOL_WARNING, onJobEStop, Colors::kStatusDanger);
 
   formatAxis(status_x_label, "X", 0);
   formatAxis(status_y_label, "Y", 0);

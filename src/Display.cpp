@@ -746,7 +746,7 @@ void drawSplash() {
     gfx.setTextColor(gfx.color565(150, 158, 170), TFT_BLACK);
     gfx.setTextDatum(middle_center);
     gfx.setTextSize(1);
-    gfx.drawString((String("Firmware v") + kAppVersion).c_str(), kScreenWidth / 2, y + kFluidNCLogoHeight + 18);
+    gfx.drawString((String("v") + kAppVersion).c_str(), kScreenWidth / 2, y + kFluidNCLogoHeight + 18);
   }
 
   if (!can_draw_logo) {

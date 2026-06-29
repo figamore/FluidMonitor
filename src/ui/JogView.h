@@ -7,3 +7,4 @@
 
 void createJogTab(lv_obj_t* tab);
 void cancelJog();
+void setJogLocked(bool locked);

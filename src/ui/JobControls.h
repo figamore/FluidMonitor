@@ -10,7 +10,8 @@ bool machineJobPaused();
 const char* activeJobName();
 int activeJobPercent();
 
-void onJobPause(lv_event_t* event);
-void onJobResume(lv_event_t* event);
+void onJobPauseToggle(lv_event_t* event);
 void onJobAbort(lv_event_t* event);
-void onJobEStop(lv_event_t* event);
+
+// Sets a pause/play button's icon and colour to match the current hold state.
+void updateJobPauseButton(lv_obj_t* button);

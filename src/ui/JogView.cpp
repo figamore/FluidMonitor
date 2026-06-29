@@ -10,6 +10,8 @@
 
 namespace {
 
+lv_obj_t* jog_lock_overlay = nullptr;
+
 float selectedJogDistance() {
   static const float distances[] = {0.1f, 1.0f, 10.0f, 100.0f};
   return distances[selected_jog_step < 4 ? selected_jog_step : 1];
@@ -184,5 +186,34 @@ void createJogTab(lv_obj_t* tab) {
   lv_obj_t* z_minus = createJogButton(pad, "Z" LV_SYMBOL_DOWN, 'Z', -1, lv_color_hex(Colors::kAxisZ));
   lv_obj_align(z_minus, LV_ALIGN_BOTTOM_RIGHT, -12, 0);
 
+  jog_lock_overlay = lv_obj_create(tab);
+  lv_obj_remove_style_all(jog_lock_overlay);
+  lv_obj_add_flag(jog_lock_overlay, LV_OBJ_FLAG_IGNORE_LAYOUT);
+  lv_obj_add_flag(jog_lock_overlay, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_set_size(jog_lock_overlay, LV_PCT(100), LV_PCT(100));
+  lv_obj_align(jog_lock_overlay, LV_ALIGN_TOP_LEFT, 0, 0);
+  lv_obj_set_style_bg_color(jog_lock_overlay, lv_color_hex(Colors::kBg), LV_PART_MAIN);
+  lv_obj_set_style_bg_opa(jog_lock_overlay, LV_OPA_COVER, LV_PART_MAIN);
+  lv_obj_clear_flag(jog_lock_overlay, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_add_flag(jog_lock_overlay, LV_OBJ_FLAG_HIDDEN);
+
+  lv_obj_t* lock_label = lv_label_create(jog_lock_overlay);
+  lv_label_set_text(lock_label, LV_SYMBOL_PLAY "  Job in progress");
+  lv_obj_set_style_text_font(lock_label, &lv_font_montserrat_18, LV_PART_MAIN);
+  lv_obj_set_style_text_color(lock_label, lv_color_hex(Colors::kTextMuted), LV_PART_MAIN);
+  lv_obj_center(lock_label);
+
   updateJogStepButtons();
+}
+
+void setJogLocked(bool locked) {
+  if (!jog_lock_overlay) {
+    return;
+  }
+  if (locked) {
+    cancelJog();
+    lv_obj_clear_flag(jog_lock_overlay, LV_OBJ_FLAG_HIDDEN);
+  } else {
+    lv_obj_add_flag(jog_lock_overlay, LV_OBJ_FLAG_HIDDEN);
+  }
 }

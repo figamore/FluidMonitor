@@ -28,6 +28,7 @@ lv_obj_t* job_info_label = nullptr;
 lv_obj_t* job_running_label = nullptr;
 lv_obj_t* job_progress_track = nullptr;
 lv_obj_t* job_progress_fill = nullptr;
+lv_obj_t* job_pause_btn = nullptr;
 
 void copyText(char* dest, size_t size, const char* src) {
   if (!dest || size == 0) {
@@ -184,7 +185,6 @@ void onShowJobs(lv_event_t* event) {
   if (lv_event_get_code(event) != LV_EVENT_CLICKED) {
     return;
   }
-  setViewVisible(actions_home_view, false);
   setViewVisible(actions_job_view, true);
   if (job_state.file_count == 0 && !job_state.list_loading) {
     requestJobList();
@@ -209,6 +209,7 @@ void onRunSelected(lv_event_t* event) {
     job_state.active = true;
     job_state.active_percent = 0;
     copyText(job_state.active_name, sizeof(job_state.active_name), job_state.selected);
+    job_state.selected[0] = '\0';
     setStatus(lv_color_hex(Colors::kStatusWarning));
   } else {
     job_state.list_error = true;
@@ -230,14 +231,13 @@ void onBackFromJobs(lv_event_t* event) {
   if (lv_event_get_code(event) != LV_EVENT_CLICKED) {
     return;
   }
-  // From a selected file, step back to the list; otherwise leave the browser.
-  if (!machineJobControlsVisible() && job_state.selected[0] != '\0') {
+  // From a selected file, step back to the list; otherwise close the browser.
+  if (job_state.selected[0] != '\0') {
     job_state.selected[0] = '\0';
     updateActionsJobStatus();
     return;
   }
   setViewVisible(actions_job_view, false);
-  setViewVisible(actions_home_view, true);
 }
 
 void addAxisRow(lv_obj_t* col, char axis, lv_color_t color, const char* zero_cmd, const char* home_cmd,
@@ -270,7 +270,8 @@ void addAxisRow(lv_obj_t* col, char axis, lv_color_t color, const char* zero_cmd
 
 lv_obj_t* createJobButton(lv_obj_t* parent, const char* text, lv_event_cb_t cb, uint32_t color) {
   lv_obj_t* button = createSmallButton(parent, text, cb, nullptr);
-  lv_obj_set_size(button, 56, 40);
+  lv_obj_set_height(button, 40);
+  lv_obj_set_flex_grow(button, 1);
   accentButton(button, lv_color_hex(color));
   return button;
 }
@@ -309,7 +310,7 @@ void createActionsHome(lv_obj_t* tab) {
   lv_obj_t* home_all = createSmallButton(right, LV_SYMBOL_HOME " All", onCommandAction, const_cast<char*>("$H"));
   lv_obj_set_width(home_all, LV_PCT(100));
   lv_obj_set_flex_grow(home_all, 1);
-  lv_obj_t* run_job = createSmallButton(right, "Run Job", onShowJobs, nullptr);
+  lv_obj_t* run_job = createSmallButton(right, LV_SYMBOL_SD_CARD " SD", onShowJobs, nullptr);
   lv_obj_set_width(run_job, LV_PCT(100));
   lv_obj_set_flex_grow(run_job, 1);
 }
@@ -371,13 +372,12 @@ void createJobRunningView(lv_obj_t* parent) {
   lv_obj_remove_style_all(controls);
   lv_obj_set_size(controls, LV_PCT(100), 42);
   lv_obj_set_flex_flow(controls, LV_FLEX_FLOW_ROW);
-  lv_obj_set_flex_align(controls, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+  lv_obj_set_flex_align(controls, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+  lv_obj_set_style_pad_column(controls, 8, LV_PART_MAIN);
   lv_obj_clear_flag(controls, LV_OBJ_FLAG_SCROLLABLE);
 
-  createJobButton(controls, LV_SYMBOL_PAUSE, onJobPause, Colors::kStatusWarning);
-  createJobButton(controls, LV_SYMBOL_PLAY, onJobResume, Colors::kStatusSuccess);
+  job_pause_btn = createJobButton(controls, LV_SYMBOL_PAUSE, onJobPauseToggle, Colors::kStatusWarning);
   createJobButton(controls, LV_SYMBOL_STOP, onJobAbort, Colors::kStatusError);
-  createJobButton(controls, LV_SYMBOL_WARNING, onJobEStop, Colors::kStatusDanger);
 }
 
 void createJobHeader(lv_obj_t* parent) {
@@ -403,10 +403,17 @@ void createJobHeader(lv_obj_t* parent) {
   lv_obj_set_size(job_refresh_btn, 46, 30);
 }
 
-void createJobView(lv_obj_t* tab) {
-  actions_job_view = lv_obj_create(tab);
+void createJobView() {
+  // Sits below the topbar and covers the tab strip (topbar is 42px in Ui.cpp).
+  constexpr int kTopbarHeight = 42;
+
+  actions_job_view = lv_obj_create(lv_layer_top());
   lv_obj_remove_style_all(actions_job_view);
-  lv_obj_set_size(actions_job_view, LV_PCT(100), LV_PCT(100));
+  lv_obj_set_size(actions_job_view, kScreenWidth, kScreenHeight - kTopbarHeight);
+  lv_obj_align(actions_job_view, LV_ALIGN_TOP_LEFT, 0, kTopbarHeight);
+  lv_obj_set_style_bg_color(actions_job_view, lv_color_hex(Colors::kBg), LV_PART_MAIN);
+  lv_obj_set_style_bg_opa(actions_job_view, LV_OPA_COVER, LV_PART_MAIN);
+  lv_obj_set_style_pad_all(actions_job_view, 8, LV_PART_MAIN);
   lv_obj_set_flex_flow(actions_job_view, LV_FLEX_FLOW_COLUMN);
   lv_obj_set_flex_align(actions_job_view, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
   lv_obj_set_style_pad_row(actions_job_view, 6, LV_PART_MAIN);
@@ -423,7 +430,6 @@ void createJobView(lv_obj_t* tab) {
 
   createJobListView(body);
   createJobInfoView(body);
-  createJobRunningView(body);
   updateActionsJobStatus();
 }
 
@@ -437,44 +443,44 @@ void createActionsTab(lv_obj_t* tab) {
   lv_obj_clear_flag(tab, LV_OBJ_FLAG_SCROLLABLE);
 
   createActionsHome(tab);
-  createJobView(tab);
+  createJobRunningView(tab);
+  createJobView();
 }
 
 void updateActionsJobStatus() {
   const bool running = machineJobControlsVisible();
-  const bool selected = !running && job_state.selected[0] != '\0';
-  const bool listing = !running && !selected;
 
-  setViewVisible(job_list_view, listing);
-  setViewVisible(job_info_view, selected);
+  // Running job takes over the normal Actions tab; jogging is locked out.
+  setViewVisible(actions_home_view, !running);
   setViewVisible(job_running_view, running);
-  setViewVisible(job_refresh_btn, listing);
+  setJogLocked(running);
 
   if (running) {
-    if (job_header_title) {
-      lv_label_set_text(job_header_title, activeJobName());
-    }
+    setViewVisible(actions_job_view, false);
     if (job_running_label) {
       lv_label_set_text_fmt(job_running_label, "%s  %d%%", activeJobName(), activeJobPercent());
     }
     setProgress(job_progress_fill, activeJobPercent());
+    updateJobPauseButton(job_pause_btn);
     pending_job_ui = false;
     return;
   }
 
+  // Browser overlay: file list, or the selected-file run panel.
+  const bool selected = job_state.selected[0] != '\0';
+  setViewVisible(job_list_view, !selected);
+  setViewVisible(job_info_view, selected);
+  setViewVisible(job_refresh_btn, !selected);
+
+  if (job_header_title) {
+    lv_label_set_text(job_header_title, job_state.path);
+  }
   if (selected) {
-    if (job_header_title) {
-      lv_label_set_text(job_header_title, job_state.path);
-    }
     if (job_info_label) {
       lv_label_set_text(job_info_label, job_state.selected);
     }
     pending_job_ui = false;
     return;
-  }
-
-  if (job_header_title) {
-    lv_label_set_text(job_header_title, job_state.path);
   }
   if (pending_job_ui) {
     rebuildJobList();
