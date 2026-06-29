@@ -21,7 +21,7 @@ void updateJogStepButtons() {
       continue;
     }
     lv_obj_set_style_bg_color(jog_step_buttons[i],
-                              lv_color_hex(i == selected_jog_step ? Colors::kStatusWarning : Colors::kBgButton),
+                              lv_color_hex(i == selected_jog_step ? Colors::kBgAccent : Colors::kBgButton),
                               LV_PART_MAIN);
     lv_obj_set_style_text_color(jog_step_buttons[i],
                                 lv_color_hex(i == selected_jog_step ? Colors::kTextWhite : Colors::kTextTertiary),
