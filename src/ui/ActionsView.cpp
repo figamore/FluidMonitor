@@ -6,6 +6,7 @@
 #include <cstdio>
 
 #include "../AppState.h"
+#include "../Colors.h"
 #include "JogView.h"
 #include "Ui.h"
 
@@ -70,7 +71,7 @@ void createActionsTab(lv_obj_t* tab) {
 
   addAxisRow(left, 'X', lv_color_hex(0xF87171), "G10L20P0X0", "$HX", "G90G0X0");
   addAxisRow(left, 'Y', lv_color_hex(0x34D399), "G10L20P0Y0", "$HY", "G90G0Y0");
-  addAxisRow(left, 'Z', lv_color_hex(0x60A5FA), "G10L20P0Z0", "$HZ", "G90G0Z0");
+  addAxisRow(left, 'Z', lv_color_hex(Colors::kAxisZ), "G10L20P0Z0", "$HZ", "G90G0Z0");
 
   lv_obj_t* right = lv_obj_create(tab);
   lv_obj_remove_style_all(right);

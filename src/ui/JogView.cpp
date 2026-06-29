@@ -4,6 +4,7 @@
 #include "JogView.h"
 
 #include "../AppState.h"
+#include "../Colors.h"
 #include "../Display.h"
 #include "Ui.h"
 
@@ -20,10 +21,10 @@ void updateJogStepButtons() {
       continue;
     }
     lv_obj_set_style_bg_color(jog_step_buttons[i],
-                              lv_color_hex(i == selected_jog_step ? 0xF59E0B : 0x243241),
+                              lv_color_hex(i == selected_jog_step ? Colors::kStatusWarning : Colors::kBgButton),
                               LV_PART_MAIN);
     lv_obj_set_style_text_color(jog_step_buttons[i],
-                                lv_color_hex(i == selected_jog_step ? 0xFFFFFF : 0xCBD5E1),
+                                lv_color_hex(i == selected_jog_step ? Colors::kTextWhite : Colors::kTextTertiary),
                                 LV_PART_MAIN);
   }
 }
@@ -45,11 +46,11 @@ void onJogStep(lv_event_t* event) {
 
 void startJog(char axis, int direction) {
   if (!fluidnc.isConnected()) {
-    setStatus(lv_color_hex(0xF87171));
+    setStatus(lv_color_hex(Colors::kStatusError));
     return;
   }
   if (!fluidnc.isIdle()) {
-    setStatus(lv_color_hex(0xF59E0B));
+    setStatus(lv_color_hex(Colors::kStatusWarning));
     return;
   }
   cancelJog();
@@ -103,9 +104,9 @@ lv_obj_t* createJogButton(lv_obj_t* parent, const char* text, char axis, int dir
   lv_obj_t* button = lv_btn_create(parent);
   lv_obj_add_style(button, &style_button, LV_PART_MAIN);
   lv_obj_set_size(button, 70, 48);
-  lv_obj_set_style_bg_color(button, lv_color_hex(0x1B2430), LV_PART_MAIN);
+  lv_obj_set_style_bg_color(button, lv_color_hex(Colors::kBgInactive), LV_PART_MAIN);
 
-  lv_obj_set_style_bg_color(button, lv_color_hex(0x33455B), LV_PART_MAIN | LV_STATE_PRESSED);
+  lv_obj_set_style_bg_color(button, lv_color_hex(Colors::kBgAccentPressed), LV_PART_MAIN | LV_STATE_PRESSED);
   lv_obj_set_style_border_color(button, color, LV_PART_MAIN | LV_STATE_PRESSED);
   lv_obj_set_style_border_width(button, 2, LV_PART_MAIN | LV_STATE_PRESSED);
   lv_obj_set_style_outline_color(button, color, LV_PART_MAIN | LV_STATE_PRESSED);
@@ -167,20 +168,20 @@ void createJogTab(lv_obj_t* tab) {
   lv_obj_set_size(pad, LV_PCT(100), 118);
   lv_obj_clear_flag(pad, LV_OBJ_FLAG_SCROLLABLE);
 
-  lv_obj_t* y_plus = createJogButton(pad, "Y" LV_SYMBOL_UP, 'Y', 1, lv_color_hex(0x34D399));
+  lv_obj_t* y_plus = createJogButton(pad, "Y" LV_SYMBOL_UP, 'Y', 1, lv_color_hex(Colors::kStatusSuccess));
   lv_obj_align(y_plus, LV_ALIGN_TOP_MID, -42, 0);
-  lv_obj_t* z_plus = createJogButton(pad, "Z" LV_SYMBOL_UP, 'Z', 1, lv_color_hex(0x60A5FA));
+  lv_obj_t* z_plus = createJogButton(pad, "Z" LV_SYMBOL_UP, 'Z', 1, lv_color_hex(Colors::kAxisZ));
   lv_obj_align(z_plus, LV_ALIGN_TOP_RIGHT, -12, 0);
 
-  lv_obj_t* x_minus = createJogButton(pad, "X" LV_SYMBOL_LEFT, 'X', -1, lv_color_hex(0xF87171));
+  lv_obj_t* x_minus = createJogButton(pad, "X" LV_SYMBOL_LEFT, 'X', -1, lv_color_hex(Colors::kStatusError));
   lv_obj_align(x_minus, LV_ALIGN_CENTER, -122, 0);
 
-  lv_obj_t* x_plus = createJogButton(pad, "X" LV_SYMBOL_RIGHT, 'X', 1, lv_color_hex(0xF87171));
+  lv_obj_t* x_plus = createJogButton(pad, "X" LV_SYMBOL_RIGHT, 'X', 1, lv_color_hex(Colors::kStatusError));
   lv_obj_align(x_plus, LV_ALIGN_CENTER, 38, 0);
 
-  lv_obj_t* y_minus = createJogButton(pad, "Y" LV_SYMBOL_DOWN, 'Y', -1, lv_color_hex(0x34D399));
+  lv_obj_t* y_minus = createJogButton(pad, "Y" LV_SYMBOL_DOWN, 'Y', -1, lv_color_hex(Colors::kStatusSuccess));
   lv_obj_align(y_minus, LV_ALIGN_BOTTOM_MID, -42, 0);
-  lv_obj_t* z_minus = createJogButton(pad, "Z" LV_SYMBOL_DOWN, 'Z', -1, lv_color_hex(0x60A5FA));
+  lv_obj_t* z_minus = createJogButton(pad, "Z" LV_SYMBOL_DOWN, 'Z', -1, lv_color_hex(Colors::kAxisZ));
   lv_obj_align(z_minus, LV_ALIGN_BOTTOM_RIGHT, -12, 0);
 
   updateJogStepButtons();

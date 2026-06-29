@@ -4,6 +4,7 @@
 #include "StatusView.h"
 
 #include "../AppState.h"
+#include "../Colors.h"
 #include "Ui.h"
 
 namespace {
@@ -12,8 +13,8 @@ void styleSegment(lv_obj_t* segment, bool active) {
   if (!segment) {
     return;
   }
-  lv_obj_set_style_bg_color(segment, lv_color_hex(active ? 0x2563EB : 0x1B2430), LV_PART_MAIN);
-  lv_obj_set_style_text_color(segment, lv_color_hex(active ? 0xFFFFFF : 0x93A4B7), LV_PART_MAIN);
+  lv_obj_set_style_bg_color(segment, lv_color_hex(active ? Colors::kBgAccent : Colors::kBgInactive), LV_PART_MAIN);
+  lv_obj_set_style_text_color(segment, lv_color_hex(active ? Colors::kTextWhite : Colors::kTextMuted), LV_PART_MAIN);
 }
 
 void updateStatusModeButtons() {
@@ -31,7 +32,7 @@ lv_obj_t* createSegment(lv_obj_t* parent, const char* text, lv_event_cb_t cb, bo
   if (divider) {
     lv_obj_set_style_border_width(segment, 1, LV_PART_MAIN);
     lv_obj_set_style_border_side(segment, LV_BORDER_SIDE_TOP, LV_PART_MAIN);
-    lv_obj_set_style_border_color(segment, lv_color_hex(0x344151), LV_PART_MAIN);
+    lv_obj_set_style_border_color(segment, lv_color_hex(Colors::kBorder), LV_PART_MAIN);
   }
   lv_obj_add_event_cb(segment, cb, LV_EVENT_CLICKED, nullptr);
 
@@ -86,10 +87,10 @@ void createStatusTab(lv_obj_t* tab) {
   lv_obj_set_flex_flow(modes, LV_FLEX_FLOW_COLUMN);
   lv_obj_set_style_radius(modes, 10, LV_PART_MAIN);
   lv_obj_set_style_clip_corner(modes, true, LV_PART_MAIN);
-  lv_obj_set_style_bg_color(modes, lv_color_hex(0x111821), LV_PART_MAIN);
+  lv_obj_set_style_bg_color(modes, lv_color_hex(Colors::kBgTertiary), LV_PART_MAIN);
   lv_obj_set_style_bg_opa(modes, LV_OPA_COVER, LV_PART_MAIN);
   lv_obj_set_style_border_width(modes, 1, LV_PART_MAIN);
-  lv_obj_set_style_border_color(modes, lv_color_hex(0x344151), LV_PART_MAIN);
+  lv_obj_set_style_border_color(modes, lv_color_hex(Colors::kBorder), LV_PART_MAIN);
   lv_obj_set_style_pad_all(modes, 0, LV_PART_MAIN);
   lv_obj_set_style_pad_row(modes, 0, LV_PART_MAIN);
   lv_obj_clear_flag(modes, LV_OBJ_FLAG_SCROLLABLE);

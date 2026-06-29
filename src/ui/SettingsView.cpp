@@ -4,6 +4,7 @@
 #include "SettingsView.h"
 
 #include "../AppState.h"
+#include "../Colors.h"
 #include "../Display.h"
 #include "Ui.h"
 #include "generated/version.h"
@@ -33,7 +34,7 @@ void onPair(lv_event_t*) {
 
 void onForget(lv_event_t*) {
   fluidnc.forgetAllMachines();
-  setStatus(lv_color_hex(0xF59E0B));
+  setStatus(lv_color_hex(Colors::kStatusWarning));
   if (peer_label) {
     lv_label_set_text(peer_label, "No paired machine");
   }
@@ -91,8 +92,8 @@ void updateInactivitySegments() {
       continue;
     }
     bool active = (i == inactivityMode());
-    lv_obj_set_style_bg_color(inactivity_segments[i], lv_color_hex(active ? 0x2563EB : 0x1B2430), LV_PART_MAIN);
-    lv_obj_set_style_text_color(inactivity_segments[i], lv_color_hex(active ? 0xFFFFFF : 0x93A4B7), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(inactivity_segments[i], lv_color_hex(active ? Colors::kBgAccent : Colors::kBgInactive), LV_PART_MAIN);
+    lv_obj_set_style_text_color(inactivity_segments[i], lv_color_hex(active ? Colors::kTextWhite : Colors::kTextMuted), LV_PART_MAIN);
   }
 }
 
@@ -112,7 +113,7 @@ void createInactivitySegment(lv_obj_t* parent, uint8_t index, const char* text, 
   if (divider) {
     lv_obj_set_style_border_width(segment, 1, LV_PART_MAIN);
     lv_obj_set_style_border_side(segment, LV_BORDER_SIDE_LEFT, LV_PART_MAIN);
-    lv_obj_set_style_border_color(segment, lv_color_hex(0x344151), LV_PART_MAIN);
+    lv_obj_set_style_border_color(segment, lv_color_hex(Colors::kBorder), LV_PART_MAIN);
   }
   lv_obj_add_event_cb(segment, onInactivitySelect, LV_EVENT_CLICKED, reinterpret_cast<void*>(static_cast<uintptr_t>(index)));
 
@@ -132,7 +133,7 @@ lv_obj_t* createSection(lv_obj_t* parent, const char* icon, const char* title) {
   lv_obj_t* heading = lv_label_create(card);
   lv_label_set_text_fmt(heading, "%s  %s", icon, title);
   lv_obj_set_style_text_font(heading, &lv_font_montserrat_14, LV_PART_MAIN);
-  lv_obj_set_style_text_color(heading, lv_color_hex(0x67E8F9), LV_PART_MAIN);
+  lv_obj_set_style_text_color(heading, lv_color_hex(Colors::kTextCyan), LV_PART_MAIN);
   return card;
 }
 
@@ -186,7 +187,7 @@ void createSettingsTab(lv_obj_t* tab) {
   peer_label = lv_label_create(connection);
   lv_obj_add_style(peer_label, &style_muted, LV_PART_MAIN);
   lv_obj_set_style_text_font(peer_label, &lv_font_montserrat_16, LV_PART_MAIN);
-  lv_obj_set_style_text_color(peer_label, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+  lv_obj_set_style_text_color(peer_label, lv_color_hex(Colors::kTextWhite), LV_PART_MAIN);
   lv_obj_set_width(peer_label, LV_PCT(100));
   lv_label_set_long_mode(peer_label, LV_LABEL_LONG_DOT);
   lv_label_set_text(peer_label, "No paired machine");
@@ -227,7 +228,7 @@ void createSettingsTab(lv_obj_t* tab) {
   lv_label_set_text(brightness_caption, "Brightness");
   lv_obj_add_style(brightness_caption, &style_muted, LV_PART_MAIN);
   lv_obj_set_style_text_font(brightness_caption, &lv_font_montserrat_16, LV_PART_MAIN);
-  lv_obj_set_style_text_color(brightness_caption, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+  lv_obj_set_style_text_color(brightness_caption, lv_color_hex(Colors::kTextWhite), LV_PART_MAIN);
 
   lv_obj_t* brightness_controls = lv_obj_create(brightness_row);
   lv_obj_remove_style_all(brightness_controls);
@@ -258,7 +259,7 @@ void createSettingsTab(lv_obj_t* tab) {
   lv_label_set_text(orientation_caption, "Orientation");
   lv_obj_add_style(orientation_caption, &style_muted, LV_PART_MAIN);
   lv_obj_set_style_text_font(orientation_caption, &lv_font_montserrat_16, LV_PART_MAIN);
-  lv_obj_set_style_text_color(orientation_caption, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+  lv_obj_set_style_text_color(orientation_caption, lv_color_hex(Colors::kTextWhite), LV_PART_MAIN);
 
   lv_obj_t* orientation_button = lv_btn_create(orientation_row);
   lv_obj_add_style(orientation_button, &style_button, LV_PART_MAIN);
@@ -279,7 +280,7 @@ void createSettingsTab(lv_obj_t* tab) {
   lv_label_set_text(inactivity_caption, "Inactivity");
   lv_obj_add_style(inactivity_caption, &style_muted, LV_PART_MAIN);
   lv_obj_set_style_text_font(inactivity_caption, &lv_font_montserrat_16, LV_PART_MAIN);
-  lv_obj_set_style_text_color(inactivity_caption, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+  lv_obj_set_style_text_color(inactivity_caption, lv_color_hex(Colors::kTextWhite), LV_PART_MAIN);
 
   lv_obj_t* inactivity_selector = lv_obj_create(inactivity_row);
   lv_obj_remove_style_all(inactivity_selector);
@@ -303,7 +304,7 @@ void createSettingsTab(lv_obj_t* tab) {
   lv_label_set_text(units_label, "Units: mm");
   lv_obj_add_style(units_label, &style_muted, LV_PART_MAIN);
   lv_obj_set_style_text_font(units_label, &lv_font_montserrat_16, LV_PART_MAIN);
-  lv_obj_set_style_text_color(units_label, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+  lv_obj_set_style_text_color(units_label, lv_color_hex(Colors::kTextWhite), LV_PART_MAIN);
 
   lv_obj_t* about_app = lv_label_create(about);
   lv_label_set_text_fmt(about_app, "FluidMonitor v%s " LV_SYMBOL_BULLET " ESP-NOW", kAppVersion);
@@ -313,8 +314,8 @@ void createSettingsTab(lv_obj_t* tab) {
   lv_obj_t* shutdown = lv_btn_create(tab);
   lv_obj_add_style(shutdown, &style_button, LV_PART_MAIN);
   lv_obj_set_size(shutdown, LV_PCT(100), 42);
-  lv_obj_set_style_bg_color(shutdown, lv_color_hex(0x7F1D1D), LV_PART_MAIN);
-  lv_obj_set_style_border_color(shutdown, lv_color_hex(0xB91C1C), LV_PART_MAIN);
+  lv_obj_set_style_bg_color(shutdown, lv_color_hex(Colors::kBgDanger), LV_PART_MAIN);
+  lv_obj_set_style_border_color(shutdown, lv_color_hex(Colors::kBorderDanger), LV_PART_MAIN);
   lv_obj_add_event_cb(shutdown, onShutdown, LV_EVENT_CLICKED, nullptr);
 
   lv_obj_t* shutdown_label = lv_label_create(shutdown);
@@ -341,7 +342,7 @@ void createPairingSuccessPanel(lv_obj_t* screen) {
   lv_obj_t* title = lv_label_create(pairing_success_panel);
   lv_label_set_text(title, LV_SYMBOL_OK "  Paired successfully");
   lv_obj_set_style_text_font(title, &lv_font_montserrat_18, LV_PART_MAIN);
-  lv_obj_set_style_text_color(title, lv_color_hex(0x34D399), LV_PART_MAIN);
+  lv_obj_set_style_text_color(title, lv_color_hex(Colors::kStatusSuccess), LV_PART_MAIN);
 
   lv_obj_t* action = lv_btn_create(pairing_success_panel);
   lv_obj_add_style(action, &style_button, LV_PART_MAIN);

@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "AppState.h"
+#include "Colors.h"
 #include "ui/SettingsView.h"
 #include "ui/Ui.h"
 
@@ -34,43 +35,43 @@ void onStatus(const FluidNCStatus& status) {
 
 void initFluidLink() {
   fluidnc.onPairingStarted([]() {
-    setStatus(lv_color_hex(0x38BDF8));
+    setStatus(lv_color_hex(Colors::kStatusInfo));
     setStateLabel(LV_SYMBOL_SHUFFLE " Pairing Mode");
     setPairButtonText(LV_SYMBOL_CLOSE "  Cancel");
   });
   fluidnc.onPairingCancelled([]() {
-    setStatus(lv_color_hex(0xF59E0B));
+    setStatus(lv_color_hex(Colors::kStatusWarning));
     setStateLabel("State: --");
     setPairButtonText(LV_SYMBOL_SHUFFLE "  Pair");
   });
   fluidnc.onPairingFailed([]() {
-    setStatus(lv_color_hex(0xF87171));
+    setStatus(lv_color_hex(Colors::kStatusError));
     setStateLabel("Pairing failed");
     setPairButtonText(LV_SYMBOL_SHUFFLE "  Pair");
   });
   fluidnc.onPaired([](const FluidNCMachine&) {
-    setStatus(lv_color_hex(0x34D399));
+    setStatus(lv_color_hex(Colors::kStatusSuccess));
     setPairButtonText(LV_SYMBOL_SHUFFLE "  Pair");
     updatePeerLabel();
     showPairingSuccess();
   });
   fluidnc.onConnected([](const FluidNCMachine&) {
-    setStatus(lv_color_hex(0x34D399));
+    setStatus(lv_color_hex(Colors::kStatusSuccess));
   });
   fluidnc.onDisconnected([](const FluidNCMachine&) {
     jog_active = false;
-    setStatus(lv_color_hex(0xF59E0B));
+    setStatus(lv_color_hex(Colors::kStatusWarning));
   });
   fluidnc.onSendFailed([]() {
-    setStatus(lv_color_hex(0xF87171));
+    setStatus(lv_color_hex(Colors::kStatusError));
   });
   fluidnc.onStatus(onStatus);
 
   if (!fluidnc.begin()) {
-    setStatus(lv_color_hex(0xF87171));
+    setStatus(lv_color_hex(Colors::kStatusError));
     return;
   }
-  setStatus(lv_color_hex(0x34D399));
+  setStatus(lv_color_hex(Colors::kStatusSuccess));
   updatePeerLabel();
 }
 

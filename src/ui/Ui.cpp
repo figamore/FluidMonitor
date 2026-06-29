@@ -8,6 +8,7 @@
 
 #include "../AppState.h"
 #include "../BatteryMonitor.h"
+#include "../Colors.h"
 #include "app_config.h"
 #include "ActionsView.h"
 #include "JogView.h"
@@ -164,12 +165,12 @@ void startShutdownUi() {
 
   lv_obj_t* title = lv_label_create(shutdown_overlay);
   lv_label_set_text(title, "Shutting down");
-  lv_obj_set_style_text_color(title, lv_color_hex(0x38BDF8), LV_PART_MAIN);
+  lv_obj_set_style_text_color(title, lv_color_hex(Colors::kStatusInfo), LV_PART_MAIN);
   lv_obj_set_style_text_font(title, &lv_font_montserrat_18, LV_PART_MAIN);
 
   shutdown_countdown_label = lv_label_create(shutdown_overlay);
   lv_label_set_text(shutdown_countdown_label, "10");
-  lv_obj_set_style_text_color(shutdown_countdown_label, lv_color_hex(0xF8FAFC), LV_PART_MAIN);
+  lv_obj_set_style_text_color(shutdown_countdown_label, lv_color_hex(Colors::kTextPrimary), LV_PART_MAIN);
   lv_obj_set_style_text_font(shutdown_countdown_label, &lv_font_montserrat_32, LV_PART_MAIN);
   lv_obj_set_style_text_align(shutdown_countdown_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
   lv_obj_set_size(shutdown_countdown_label, LV_PCT(100), 42);
@@ -190,41 +191,41 @@ void startShutdownUi() {
 
 void initStyles() {
   lv_style_init(&style_screen);
-  lv_style_set_bg_color(&style_screen, lv_color_hex(0x080B0F));
-  lv_style_set_text_color(&style_screen, lv_color_hex(0xEEF6F8));
+  lv_style_set_bg_color(&style_screen, lv_color_hex(Colors::kBg));
+  lv_style_set_text_color(&style_screen, lv_color_hex(Colors::kText));
 
   lv_style_init(&style_topbar);
-  lv_style_set_bg_color(&style_topbar, lv_color_hex(0x151A20));
+  lv_style_set_bg_color(&style_topbar, lv_color_hex(Colors::kBgTopbar));
   lv_style_set_bg_opa(&style_topbar, LV_OPA_COVER);
   lv_style_set_border_width(&style_topbar, 0);
   lv_style_set_pad_left(&style_topbar, 10);
   lv_style_set_pad_right(&style_topbar, 10);
 
   lv_style_init(&style_panel);
-  lv_style_set_bg_color(&style_panel, lv_color_hex(0x17202A));
+  lv_style_set_bg_color(&style_panel, lv_color_hex(Colors::kBgPanel));
   lv_style_set_bg_opa(&style_panel, LV_OPA_COVER);
   lv_style_set_border_width(&style_panel, 1);
-  lv_style_set_border_color(&style_panel, lv_color_hex(0x344151));
+  lv_style_set_border_color(&style_panel, lv_color_hex(Colors::kBorder));
   lv_style_set_radius(&style_panel, 8);
 
   lv_style_init(&style_muted);
-  lv_style_set_text_color(&style_muted, lv_color_hex(0x93A4B7));
+  lv_style_set_text_color(&style_muted, lv_color_hex(Colors::kTextMuted));
   lv_style_set_text_font(&style_muted, &lv_font_montserrat_12);
 
   lv_style_init(&style_button);
-  lv_style_set_bg_color(&style_button, lv_color_hex(0x243241));
+  lv_style_set_bg_color(&style_button, lv_color_hex(Colors::kBgButton));
   lv_style_set_bg_opa(&style_button, LV_OPA_COVER);
   lv_style_set_border_width(&style_button, 1);
-  lv_style_set_border_color(&style_button, lv_color_hex(0x405267));
+  lv_style_set_border_color(&style_button, lv_color_hex(Colors::kBorderButton));
   lv_style_set_radius(&style_button, 7);
   lv_style_set_shadow_width(&style_button, 0);
-  lv_style_set_text_color(&style_button, lv_color_hex(0xF8FAFC));
+  lv_style_set_text_color(&style_button, lv_color_hex(Colors::kTextPrimary));
 
   lv_style_init(&style_overlay);
-  lv_style_set_bg_color(&style_overlay, lv_color_hex(0x101820));
+  lv_style_set_bg_color(&style_overlay, lv_color_hex(Colors::kBgOverlay));
   lv_style_set_bg_opa(&style_overlay, LV_OPA_COVER);
   lv_style_set_border_width(&style_overlay, 1);
-  lv_style_set_border_color(&style_overlay, lv_color_hex(0x38BDF8));
+  lv_style_set_border_color(&style_overlay, lv_color_hex(Colors::kBorderOverlay));
   lv_style_set_radius(&style_overlay, 8);
   lv_style_set_pad_all(&style_overlay, 10);
 }
@@ -242,12 +243,12 @@ constexpr uint8_t kJogTabIndex = 1;
 
 lv_color_t batteryColor(int level) {
   if (level >= 50) {
-    return lv_color_hex(0x34C759);
+    return lv_color_hex(Colors::kBatteryOk);
   }
   if (level >= 25) {
-    return lv_color_hex(0xFACC15);
+    return lv_color_hex(Colors::kBatteryWarning);
   }
-  return lv_color_hex(0xEF4444);
+  return lv_color_hex(Colors::kBatteryLow);
 }
 
 void updateBatteryTimer(lv_timer_t*) {
@@ -269,7 +270,7 @@ void createBatteryIndicator(lv_obj_t* parent) {
   lv_obj_set_size(body, 22, 14);
   lv_obj_align(body, LV_ALIGN_LEFT_MID, 0, 0);
   lv_obj_set_style_border_width(body, 1, LV_PART_MAIN);
-  lv_obj_set_style_border_color(body, lv_color_hex(0xF8FAFC), LV_PART_MAIN);
+  lv_obj_set_style_border_color(body, lv_color_hex(Colors::kTextPrimary), LV_PART_MAIN);
   lv_obj_set_style_bg_opa(body, LV_OPA_TRANSP, LV_PART_MAIN);
   lv_obj_clear_flag(body, LV_OBJ_FLAG_SCROLLABLE);
 
@@ -278,7 +279,7 @@ void createBatteryIndicator(lv_obj_t* parent) {
   lv_obj_set_size(battery_fill, 3, 10);
   lv_obj_align(battery_fill, LV_ALIGN_TOP_LEFT, 1, 1);
   lv_obj_set_style_bg_opa(battery_fill, LV_OPA_COVER, LV_PART_MAIN);
-  lv_obj_set_style_bg_color(battery_fill, lv_color_hex(0xEF4444), LV_PART_MAIN);
+  lv_obj_set_style_bg_color(battery_fill, lv_color_hex(Colors::kBatteryLow), LV_PART_MAIN);
   lv_obj_clear_flag(battery_fill, LV_OBJ_FLAG_SCROLLABLE);
 
   lv_obj_t* nub = lv_obj_create(battery_indicator);
@@ -286,13 +287,13 @@ void createBatteryIndicator(lv_obj_t* parent) {
   lv_obj_set_size(nub, 4, 6);
   lv_obj_align(nub, LV_ALIGN_LEFT_MID, 22, 0);
   lv_obj_set_style_bg_opa(nub, LV_OPA_COVER, LV_PART_MAIN);
-  lv_obj_set_style_bg_color(nub, lv_color_hex(0xF8FAFC), LV_PART_MAIN);
+  lv_obj_set_style_bg_color(nub, lv_color_hex(Colors::kTextPrimary), LV_PART_MAIN);
   lv_obj_clear_flag(nub, LV_OBJ_FLAG_SCROLLABLE);
 
   battery_charge = lv_label_create(battery_indicator);
   lv_label_set_text(battery_charge, LV_SYMBOL_CHARGE);
   lv_obj_set_style_text_font(battery_charge, &lv_font_montserrat_10, LV_PART_MAIN);
-  lv_obj_set_style_text_color(battery_charge, lv_color_hex(0x34C759), LV_PART_MAIN);
+  lv_obj_set_style_text_color(battery_charge, lv_color_hex(Colors::kBatteryOk), LV_PART_MAIN);
   lv_obj_align(battery_charge, LV_ALIGN_CENTER, -4, 0);
 
   updateBatteryIndicator();
@@ -506,7 +507,7 @@ lv_obj_t* makePanel(lv_obj_t* parent) {
 }
 
 static void addPressFeedback(lv_obj_t* button) {
-  lv_obj_set_style_bg_color(button, lv_color_hex(0x2E4256), LV_PART_MAIN | LV_STATE_PRESSED);
+  lv_obj_set_style_bg_color(button, lv_color_hex(Colors::kBgButtonPressed), LV_PART_MAIN | LV_STATE_PRESSED);
   lv_obj_set_style_transform_width(button, -2, LV_PART_MAIN | LV_STATE_PRESSED);
   lv_obj_set_style_transform_height(button, -2, LV_PART_MAIN | LV_STATE_PRESSED);
 }
@@ -610,7 +611,7 @@ void createUi() {
   state_label = lv_label_create(left);
   lv_label_set_text(state_label, "Disconnected");
   lv_obj_set_style_text_font(state_label, &lv_font_montserrat_18, LV_PART_MAIN);
-  lv_obj_set_style_text_color(state_label, lv_color_hex(0x67E8F9), LV_PART_MAIN);
+  lv_obj_set_style_text_color(state_label, lv_color_hex(Colors::kTextCyan), LV_PART_MAIN);
 
   topbar_dro = lv_obj_create(left);
   lv_obj_remove_style_all(topbar_dro);
@@ -636,16 +637,16 @@ void createUi() {
 
   lv_obj_t* tabs = lv_tabview_create(root, LV_DIR_TOP, 32);
   lv_obj_set_size(tabs, LV_PCT(100), kScreenHeight - 42);
-  lv_obj_set_style_bg_color(tabs, lv_color_hex(0x0B1014), LV_PART_MAIN);
+  lv_obj_set_style_bg_color(tabs, lv_color_hex(Colors::kBgSecondary), LV_PART_MAIN);
   lv_obj_set_style_border_width(tabs, 0, LV_PART_MAIN);
   lv_obj_set_scrollbar_mode(tabs, LV_SCROLLBAR_MODE_OFF);
   lv_obj_add_event_cb(tabs, onTabChanged, LV_EVENT_VALUE_CHANGED, nullptr);
 
   lv_obj_t* tab_btns = lv_tabview_get_tab_btns(tabs);
-  lv_obj_set_style_bg_color(tab_btns, lv_color_hex(0x111821), LV_PART_MAIN);
-  lv_obj_set_style_text_color(tab_btns, lv_color_hex(0x9DB3C7), LV_PART_MAIN);
-  lv_obj_set_style_text_color(tab_btns, lv_color_hex(0xFFFFFF), LV_PART_ITEMS | LV_STATE_CHECKED);
-  lv_obj_set_style_bg_color(tab_btns, lv_color_hex(0x2563EB), LV_PART_ITEMS | LV_STATE_CHECKED);
+  lv_obj_set_style_bg_color(tab_btns, lv_color_hex(Colors::kBgTertiary), LV_PART_MAIN);
+  lv_obj_set_style_text_color(tab_btns, lv_color_hex(Colors::kTextSecondary), LV_PART_MAIN);
+  lv_obj_set_style_text_color(tab_btns, lv_color_hex(Colors::kTextWhite), LV_PART_ITEMS | LV_STATE_CHECKED);
+  lv_obj_set_style_bg_color(tab_btns, lv_color_hex(Colors::kBgAccent), LV_PART_ITEMS | LV_STATE_CHECKED);
 
   lv_obj_t* status_tab = lv_tabview_add_tab(tabs, LV_SYMBOL_GPS " Status");
   lv_obj_t* jog_tab = lv_tabview_add_tab(tabs, LV_SYMBOL_LOOP " Jog");
