@@ -136,18 +136,15 @@ void rebuildJobList() {
 
   bool any_file = false;
   for (size_t i = 0; i < job_state.file_count; ++i) {
-    const FluidNCFileInfo& entry = job_state.files[i];
-    if (entry.isDirectory()) {
+    if (job_state.files[i].isDirectory()) {
       continue;
     }
     any_file = true;
-    lv_obj_t* row = lv_list_add_btn(job_list, LV_SYMBOL_FILE, entry.name);
+    lv_obj_t* row = lv_list_add_btn(job_list, LV_SYMBOL_FILE, job_state.files[i].name);
     lv_obj_add_event_cb(row, onFileSelected, LV_EVENT_CLICKED, reinterpret_cast<void*>(i));
   }
   if (!any_file) {
     lv_list_add_text(job_list, "No jobs");
-  } else if (job_state.file_truncated) {
-    lv_list_add_text(job_list, "More files on SD");
   }
 }
 
