@@ -232,6 +232,13 @@ void initStyles() {
 lv_obj_t* battery_indicator = nullptr;
 lv_obj_t* battery_fill = nullptr;
 lv_obj_t* battery_charge = nullptr;
+lv_obj_t* topbar_dro = nullptr;
+lv_obj_t* topbar_dro_x = nullptr;
+lv_obj_t* topbar_dro_y = nullptr;
+lv_obj_t* topbar_dro_z = nullptr;
+bool topbar_jog_mode = false;
+
+constexpr uint8_t kJogTabIndex = 1;
 
 lv_color_t batteryColor(int level) {
   if (level >= 50) {
@@ -290,6 +297,93 @@ void createBatteryIndicator(lv_obj_t* parent) {
 
   updateBatteryIndicator();
   lv_timer_create(updateBatteryTimer, 1000, nullptr);
+}
+
+void formatTopbarDroAxis(lv_obj_t* label, char axis, float value) {
+  if (!label) {
+    return;
+  }
+
+  char text[16];
+  snprintf(text, sizeof(text), "%c%8.3f", axis, value);
+  lv_label_set_text(label, text);
+}
+
+void updateTopbarDro() {
+  if (!latest_dro.work.valid) {
+    return;
+  }
+
+  formatTopbarDroAxis(topbar_dro_x, 'X', latest_dro.work.x);
+  formatTopbarDroAxis(topbar_dro_y, 'Y', latest_dro.work.y);
+  formatTopbarDroAxis(topbar_dro_z, 'Z', latest_dro.work.z);
+}
+
+void setTopbarJogMode(bool show_dro) {
+  if (topbar_jog_mode == show_dro) {
+    return;
+  }
+  topbar_jog_mode = show_dro;
+
+  if (state_label) {
+    if (show_dro) {
+      lv_obj_add_flag(state_label, LV_OBJ_FLAG_HIDDEN);
+    } else {
+      lv_obj_clear_flag(state_label, LV_OBJ_FLAG_HIDDEN);
+    }
+  }
+
+  if (topbar_dro) {
+    if (show_dro) {
+      updateTopbarDro();
+      lv_obj_clear_flag(topbar_dro, LV_OBJ_FLAG_HIDDEN);
+    } else {
+      lv_obj_add_flag(topbar_dro, LV_OBJ_FLAG_HIDDEN);
+    }
+  }
+}
+
+void onTabChanged(lv_event_t* event) {
+  if (lv_event_get_code(event) != LV_EVENT_VALUE_CHANGED) {
+    return;
+  }
+
+  lv_obj_t* tabs = lv_event_get_target(event);
+  setTopbarJogMode(lv_tabview_get_tab_act(tabs) == kJogTabIndex);
+}
+
+void onTabButtonChanged(lv_event_t* event) {
+  if (lv_event_get_code(event) != LV_EVENT_VALUE_CHANGED) {
+    return;
+  }
+
+  uint32_t selected = LV_BTNMATRIX_BTN_NONE;
+  uint32_t* param = static_cast<uint32_t*>(lv_event_get_param(event));
+  if (param) {
+    selected = *param;
+  } else {
+    selected = lv_btnmatrix_get_selected_btn(lv_event_get_target(event));
+  }
+  setTopbarJogMode(selected == kJogTabIndex);
+}
+
+void syncTopbarTabTimer(lv_timer_t* timer) {
+  lv_obj_t* tabs = static_cast<lv_obj_t*>(timer->user_data);
+  if (!tabs) {
+    return;
+  }
+  setTopbarJogMode(lv_tabview_get_tab_act(tabs) == kJogTabIndex);
+}
+
+lv_obj_t* createTopbarDroAxis(lv_obj_t* parent, char axis) {
+  lv_obj_t* label = lv_label_create(parent);
+  lv_obj_set_width(label, 70);
+  lv_label_set_long_mode(label, LV_LABEL_LONG_CLIP);
+  lv_obj_set_style_text_font(label, &lv_font_montserrat_14, LV_PART_MAIN);
+  lv_obj_set_style_text_color(label, lv_color_hex(0xF8FAFC), LV_PART_MAIN);
+  lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
+  formatTopbarDroAxis(label, axis, 0);
+  return label;
 }
 
 }  // namespace
@@ -500,10 +594,10 @@ void createUi() {
 
   lv_obj_t* left = lv_obj_create(topbar);
   lv_obj_remove_style_all(left);
-  lv_obj_set_size(left, 200, 34);
+  lv_obj_set_size(left, 238, 34);
   lv_obj_set_flex_flow(left, LV_FLEX_FLOW_ROW);
   lv_obj_set_flex_align(left, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-  lv_obj_set_style_pad_column(left, 8, LV_PART_MAIN);
+  lv_obj_set_style_pad_column(left, 6, LV_PART_MAIN);
   lv_obj_clear_flag(left, LV_OBJ_FLAG_SCROLLABLE);
 
   status_dot = lv_obj_create(left);
@@ -517,6 +611,19 @@ void createUi() {
   lv_label_set_text(state_label, "Disconnected");
   lv_obj_set_style_text_font(state_label, &lv_font_montserrat_18, LV_PART_MAIN);
   lv_obj_set_style_text_color(state_label, lv_color_hex(0x67E8F9), LV_PART_MAIN);
+
+  topbar_dro = lv_obj_create(left);
+  lv_obj_remove_style_all(topbar_dro);
+  lv_obj_set_size(topbar_dro, 220, 18);
+  lv_obj_set_flex_flow(topbar_dro, LV_FLEX_FLOW_ROW);
+  lv_obj_set_flex_align(topbar_dro, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+  lv_obj_set_style_pad_column(topbar_dro, 4, LV_PART_MAIN);
+  lv_obj_clear_flag(topbar_dro, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_add_flag(topbar_dro, LV_OBJ_FLAG_HIDDEN);
+
+  topbar_dro_x = createTopbarDroAxis(topbar_dro, 'X');
+  topbar_dro_y = createTopbarDroAxis(topbar_dro, 'Y');
+  topbar_dro_z = createTopbarDroAxis(topbar_dro, 'Z');
 
   lv_obj_t* right = lv_obj_create(topbar);
   lv_obj_remove_style_all(right);
@@ -532,6 +639,7 @@ void createUi() {
   lv_obj_set_style_bg_color(tabs, lv_color_hex(0x0B1014), LV_PART_MAIN);
   lv_obj_set_style_border_width(tabs, 0, LV_PART_MAIN);
   lv_obj_set_scrollbar_mode(tabs, LV_SCROLLBAR_MODE_OFF);
+  lv_obj_add_event_cb(tabs, onTabChanged, LV_EVENT_VALUE_CHANGED, nullptr);
 
   lv_obj_t* tab_btns = lv_tabview_get_tab_btns(tabs);
   lv_obj_set_style_bg_color(tab_btns, lv_color_hex(0x111821), LV_PART_MAIN);
@@ -543,6 +651,7 @@ void createUi() {
   lv_obj_t* jog_tab = lv_tabview_add_tab(tabs, LV_SYMBOL_LOOP " Jog");
   lv_obj_t* actions_tab = lv_tabview_add_tab(tabs, LV_SYMBOL_LIST " Actions");
   lv_obj_t* settings_tab = lv_tabview_add_tab(tabs, LV_SYMBOL_SETTINGS " Settings");
+  lv_obj_add_event_cb(tab_btns, onTabButtonChanged, LV_EVENT_VALUE_CHANGED, nullptr);
   createStatusTab(status_tab);
   createJogTab(jog_tab);
   createActionsTab(actions_tab);
@@ -554,6 +663,7 @@ void createUi() {
   lv_btnmatrix_set_btn_width(tab_btns, 3, 10);  // Settings
 
   lv_tabview_set_act(tabs, 0, LV_ANIM_OFF);
+  lv_timer_create(syncTopbarTabTimer, 75, tabs);
 
   createPairingSuccessPanel(screen);
 }
@@ -568,6 +678,7 @@ void applyDro() {
   snprintf(stateText, sizeof(stateText), "%.11s", latest_dro.state[0] ? latest_dro.state : "Disconnected");
   lv_label_set_text(state_label, stateText);
   updateStatusLabels();
+  updateTopbarDro();
   lv_label_set_text(units_label, latest_dro.inch ? "Units: in" : "Units: mm");
   setStatus(lv_color_hex(0x34D399));
 }
