@@ -1,9 +1,6 @@
 # FluidMonitor
 
-FluidMonitor is a LovyanGFX + LVGL DRO monitor app for CYD-style ESP32 displays.
-It uses the [FluidNC-EspNow-Client](https://github.com/figamore/FluidNC-EspNow-Client) library for
-paired ESP-NOW transport and FluidNC status parsing, and provides status, jogging,
-and machine action controls.
+FluidMonitor is a simple FluidNC DRO monitor and controller that runs on CYD-style ESP32 displays. It uses the [FluidNC-EspNow-Client](https://github.com/figamore/FluidNC-EspNow-Client) library for paired ESP-NOW transport and FluidNC status parsing, and provides status, jogging, and machine action controls.
 
 ## Build
 
@@ -11,36 +8,11 @@ and machine action controls.
 pio run -e esp32-cyd-capacitive
 ```
 
-## Project Layout
-
-- `src/main.cpp` - app startup, loop timing, and top-level lifecycle.
-- `src/Display.*` - LovyanGFX, LVGL display driver, touch input, and backlight.
-- `src/FluidLink.*` - FluidNC-EspNow-Client setup, connection callbacks, and status handling.
-- `src/ui/` - LVGL views for Status, Jog, Actions, and Settings.
-
 ## Pairing
 
-Open a pairing window on the ESP-NOW server, then open the **Settings** tab in the
-app and tap **Pair**. Once paired, the app stores the machine profile in NVS and
+Open an ESP-NOW pairing window in FluidNC, then open the **Settings** tab in the
+app and tap **Pair**. Once paired, the app stores the machine profile and
 reconnects automatically.
-
-## Settings
-
-The **Settings** tab (next to Actions) groups the **Connection** controls (Pair /
-Forget), a **Display** section, and an **About** section showing the active
-units. On shutdown-enabled builds it also hosts the **Shutdown** button.
-
-The **Display** section offers:
-
-- **Brightness** adjustment.
-- **Orientation** — a 180-degree flip of the screen and touch.
-- **Inactivity** — what the backlight does after 60 seconds of no touch: stay
-  **On**, **Dim** (default), or turn **Off**. It only triggers while the machine
-  is idle or no machine is connected, never during a running job, and any tap
-  wakes the screen. The first wake tap is swallowed so it does not also press a
-  control.
-
-All three settings persist to NVS and are reapplied on boot.
 
 ## License
 
