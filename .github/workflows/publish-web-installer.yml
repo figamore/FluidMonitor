@@ -32,8 +32,31 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Checkout FluidNC ESP-NOW branch
+        uses: actions/checkout@v4
+        with:
+          repository: figamore/FluidNC
+          ref: feature/esp-now
+          path: fluidnc
+
       - name: Configure Pages
         uses: actions/configure-pages@v6
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio/.cache
+          key: ${{ runner.os }}-pio-fluidnc
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PlatformIO
+        run: pip install --upgrade platformio
 
       - name: Build installer from release
         env:
@@ -44,6 +67,14 @@ jobs:
             --release-tag "${{ inputs.release_tag }}" \
             --variant "${{ inputs.firmware_variant }}" \
             --site-dir web-installer
+
+      - name: Build FluidNC ESP-NOW firmware
+        working-directory: fluidnc
+        run: |
+          pio run -e wifi
+          cp .pio/build/wifi/firmware.bin "$GITHUB_WORKSPACE/web-installer/fluidnc_esp32_firmware.bin"
+          pio run -e wifi_s3
+          cp .pio/build/wifi_s3/firmware.bin "$GITHUB_WORKSPACE/web-installer/fluidnc_esp32s3_firmware.bin"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4

@@ -324,6 +324,91 @@
         background: var(--bg);
       }
 
+      /* ---------- FluidNC requirement ---------- */
+      .requirement {
+        max-width: 27rem;
+        margin: 1.4rem auto 0;
+        padding: 0.85rem 1rem;
+        background: var(--accent-soft);
+        border: 1px solid #fed7aa;
+        border-radius: var(--radius-sm);
+        color: #92400e;
+        font-size: 0.9rem;
+        line-height: 1.55;
+        text-align: left;
+      }
+      .requirement strong {
+        color: #7c2d12;
+      }
+      code {
+        font-family: var(--mono);
+        font-size: 0.85em;
+        background: var(--bg-soft);
+        padding: 0.1em 0.35em;
+        border-radius: 5px;
+      }
+
+      /* ---------- FluidNC firmware ---------- */
+      .fluidnc {
+        padding: clamp(2.5rem, 6vw, 3.5rem) 0;
+        text-align: center;
+      }
+      .fluidnc h2 {
+        margin: 0 0 0.5rem;
+        font-size: 1.5rem;
+        font-weight: 750;
+        letter-spacing: -0.02em;
+      }
+      .fluidnc-note {
+        max-width: 38rem;
+        margin: 0 auto 2rem;
+        color: var(--muted);
+        font-size: 0.98rem;
+      }
+      .fw-cards {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.25rem;
+        justify-content: center;
+      }
+      .fw-card {
+        width: 17rem;
+        padding: 1.4rem;
+        background: var(--bg-soft);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+      }
+      .fw-card h3 {
+        margin: 0 0 0.2rem;
+        font-size: 1.05rem;
+      }
+      .fw-card p {
+        margin: 0 0 1.1rem;
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+      .dl-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.6rem 1.1rem;
+        border-radius: 10px;
+        background: var(--ink);
+        color: #fff;
+        font-weight: 650;
+        font-size: 0.95rem;
+        text-decoration: none;
+      }
+      .dl-btn:hover {
+        background: var(--ink-hover);
+        color: #fff;
+      }
+      .dl-btn svg {
+        width: 16px;
+        height: 16px;
+        flex: none;
+      }
+
       /* ---------- Footer ---------- */
       footer {
         border-top: 1px solid var(--border);
@@ -411,6 +496,13 @@
             The installer performs a clean flash for reliable setup. Saved settings on the device may be reset.
           </p>
         </div>
+
+        <p class="requirement">
+          <strong>Requires FluidNC with ESP-NOW.</strong> This isn't in an official
+          FluidNC release yet - until it's merged upstream, your controller must run the
+          <a href="https://github.com/figamore/FluidNC/tree/feature/esp-now" rel="noopener">feature/esp-now</a>
+          branch (<a href="#fluidnc">firmware below</a>).
+        </p>
       </section>
 
       <!-- How to flash -->
@@ -430,6 +522,36 @@
               <p>Enable <strong>ESP-NOW</strong> on your FluidNC controller, then open the <kbd>Settings</kbd> tab and tap <strong>Pair</strong> to link them.</p>
             </li>
           </ol>
+        </div>
+      </section>
+
+      <!-- FluidNC firmware (ESP-NOW branch) -->
+      <section class="wrap fluidnc" id="fluidnc">
+        <h2>FluidNC firmware</h2>
+        <p class="fluidnc-note">
+          ESP-NOW isn't in an official FluidNC release yet. Until it's merged, flash one of these
+          <code>firmware.bin</code> builds of the
+          <a href="https://github.com/figamore/FluidNC/tree/feature/esp-now" rel="noopener">feature/esp-now</a>
+          branch onto your controller - through the FluidNC web UI (OTA update), or by
+          <a href="https://github.com/figamore/FluidNC/tree/feature/esp-now" rel="noopener">building from source</a>.
+        </p>
+        <div class="fw-cards">
+          <div class="fw-card">
+            <h3>ESP32</h3>
+            <p>Most FluidNC controller boards</p>
+            <a class="dl-btn" href="fluidnc_esp32_firmware.bin" download>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+              firmware.bin
+            </a>
+          </div>
+          <div class="fw-card">
+            <h3>ESP32-S3</h3>
+            <p>Newer ESP32-S3 controller boards</p>
+            <a class="dl-btn" href="fluidnc_esp32s3_firmware.bin" download>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+              firmware.bin
+            </a>
+          </div>
         </div>
       </section>
     </main>
