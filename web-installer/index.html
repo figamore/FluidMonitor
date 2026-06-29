@@ -9,12 +9,12 @@
       content="Flash FluidMonitor firmware onto a supported ESP32 Cheap Yellow Display from your browser."
     />
     <meta name="theme-color" content="#ffffff" />
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/figamore/FluidMonitor/main/assets/fluidnc-logo.png" />
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/figamore/FluidMonitor/main/FluidNC-Logo.png" />
 
     <meta property="og:title" content="FluidMonitor - Installer" />
     <meta property="og:description" content="Flash the FluidNC ESP-NOW DRO monitor from Chrome or Edge." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://raw.githubusercontent.com/figamore/FluidMonitor/main/assets/fluidnc-logo.png" />
+    <meta property="og:image" content="https://raw.githubusercontent.com/figamore/FluidMonitor/main/FluidNC-Logo.png" />
 
     <script
       type="module"
@@ -505,26 +505,6 @@
         </p>
       </section>
 
-      <!-- How to flash -->
-      <section class="steps-section">
-        <div class="wrap">
-          <ol class="steps">
-            <li>
-              <h3>Connect</h3>
-              <p>Plug the CYD into your computer with a data-capable USB cable.</p>
-            </li>
-            <li>
-              <h3>Install</h3>
-              <p>Click <strong>Install</strong>, choose the ESP32 serial port, then wait for the flash to finish. On resistive boards, tap the on-screen target when prompted.</p>
-            </li>
-            <li>
-              <h3>Pair</h3>
-              <p>Enable <strong>ESP-NOW</strong> on your FluidNC controller, then open the <kbd>Settings</kbd> tab and tap <strong>Pair</strong> to link them.</p>
-            </li>
-          </ol>
-        </div>
-      </section>
-
       <!-- FluidNC firmware (ESP-NOW branch) -->
       <section class="wrap fluidnc" id="fluidnc">
         <h2>FluidNC firmware</h2>
@@ -546,12 +526,32 @@
           </div>
           <div class="fw-card">
             <h3>ESP32-S3</h3>
-            <p>Newer ESP32-S3 controller boards</p>
+            <p>Newer ESP32-S3 boards</p>
             <a class="dl-btn" href="fluidnc_esp32s3_firmware.bin" download>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
               firmware.bin
             </a>
           </div>
+        </div>
+      </section>
+
+      <!-- How to flash -->
+      <section class="steps-section">
+        <div class="wrap">
+          <ol class="steps">
+            <li>
+              <h3>Connect</h3>
+              <p>Plug the CYD into your computer with a data-capable USB cable.</p>
+            </li>
+            <li>
+              <h3>Install</h3>
+              <p>Click <strong>Install</strong>, choose the ESP32 serial port, then wait for the flash to finish. On resistive boards, tap the on-screen target when prompted.</p>
+            </li>
+            <li>
+              <h3>Pair</h3>
+              <p>Enable <strong>ESP-NOW</strong> on your FluidNC controller, then open the <kbd>Settings</kbd> tab and tap <strong>Pair</strong> to link them.</p>
+            </li>
+          </ol>
         </div>
       </section>
     </main>
