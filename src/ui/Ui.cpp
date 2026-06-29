@@ -564,6 +564,10 @@ void onShutdown(lv_event_t*) {
 #endif
 }
 
+void onRestart(lv_event_t*) {
+  ESP.restart();
+}
+
 void setStatus(lv_color_t color) {
   if (status_dot) {
     lv_obj_set_style_bg_color(status_dot, color, LV_PART_MAIN);

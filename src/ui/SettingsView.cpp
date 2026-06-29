@@ -310,19 +310,17 @@ void createSettingsTab(lv_obj_t* tab) {
   lv_label_set_text_fmt(about_app, "FluidMonitor v%s " LV_SYMBOL_BULLET " ESP-NOW", kAppVersion);
   lv_obj_add_style(about_app, &style_muted, LV_PART_MAIN);
 
-#if FLUIDMONITOR_ENABLE_SHUTDOWN
-  lv_obj_t* shutdown = lv_btn_create(tab);
-  lv_obj_add_style(shutdown, &style_button, LV_PART_MAIN);
-  lv_obj_set_size(shutdown, LV_PCT(100), 42);
-  lv_obj_set_style_bg_color(shutdown, lv_color_hex(Colors::kBgDanger), LV_PART_MAIN);
-  lv_obj_set_style_border_color(shutdown, lv_color_hex(Colors::kBorderDanger), LV_PART_MAIN);
-  lv_obj_add_event_cb(shutdown, onShutdown, LV_EVENT_CLICKED, nullptr);
+  lv_obj_t* restart = lv_btn_create(tab);
+  lv_obj_add_style(restart, &style_button, LV_PART_MAIN);
+  lv_obj_set_size(restart, LV_PCT(100), 42);
+  lv_obj_set_style_bg_color(restart, lv_color_hex(Colors::kBgDanger), LV_PART_MAIN);
+  lv_obj_set_style_border_color(restart, lv_color_hex(Colors::kBorderDanger), LV_PART_MAIN);
+  lv_obj_add_event_cb(restart, onRestart, LV_EVENT_CLICKED, nullptr);
 
-  lv_obj_t* shutdown_label = lv_label_create(shutdown);
-  lv_label_set_text(shutdown_label, LV_SYMBOL_POWER "  Shutdown");
-  lv_obj_set_style_text_font(shutdown_label, &lv_font_montserrat_16, LV_PART_MAIN);
-  lv_obj_center(shutdown_label);
-#endif
+  lv_obj_t* restart_label = lv_label_create(restart);
+  lv_label_set_text(restart_label, LV_SYMBOL_REFRESH "  Restart");
+  lv_obj_set_style_text_font(restart_label, &lv_font_montserrat_16, LV_PART_MAIN);
+  lv_obj_center(restart_label);
 
   updatePeerLabel();
 }

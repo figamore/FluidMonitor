@@ -9,6 +9,7 @@ void initShutdownControl();
 void pollShutdownControl();
 void createUi();
 void onShutdown(lv_event_t* event);
+void onRestart(lv_event_t* event);
 void applyDro();
 void updateBatteryIndicator();
 void setStatus(lv_color_t color);
