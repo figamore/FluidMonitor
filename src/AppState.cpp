@@ -29,6 +29,8 @@ lv_obj_t* jog_step_buttons[4] = {};
 
 DroStatus latest_dro = {};
 JobState job_state = {};
+char alarm_reason[64] = {};
+int alarm_code = 0;
 volatile bool pending_dro = false;
 volatile bool pending_job_ui = false;
 bool suppress_touch_until_release = false;

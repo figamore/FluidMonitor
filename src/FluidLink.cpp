@@ -47,6 +47,11 @@ void onStatus(const FluidNCStatus& status) {
   latest_dro.file_percent = status.filePercent;
   latest_dro.file_active = status.fileActive;
 
+  if (!stateStartsWith("Alarm")) {
+    alarm_reason[0] = '\0';
+    alarm_code = 0;
+  }
+
   job_state.active = status.fileActive || stateStartsWith("Run") || stateStartsWith("Hold");
   job_state.paused = stateStartsWith("Hold");
   job_state.active_percent = status.fileActive ? status.filePercent : -1;
@@ -119,6 +124,11 @@ void initFluidLink() {
   });
   fluidnc.onSendFailed([]() {
     setStatus(lv_color_hex(Colors::kStatusError));
+  });
+  fluidnc.onAlarm([](int code, const char* description) {
+    alarm_code = code;
+    copyText(alarm_reason, sizeof(alarm_reason), description && description[0] ? description : "Machine alarm");
+    pending_dro = true;
   });
   fluidnc.onStatus(onStatus);
   fluidnc.onFileList(onFileList);

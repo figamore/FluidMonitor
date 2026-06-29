@@ -72,6 +72,8 @@ extern lv_obj_t* jog_step_buttons[4];
 
 extern DroStatus latest_dro;
 extern JobState job_state;
+extern char alarm_reason[64];
+extern int alarm_code;
 extern volatile bool pending_dro;
 extern volatile bool pending_job_ui;
 extern bool suppress_touch_until_release;

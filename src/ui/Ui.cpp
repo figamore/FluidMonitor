@@ -5,6 +5,7 @@
 
 #include <Arduino.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "../AppState.h"
 #include "../BatteryMonitor.h"
@@ -387,6 +388,125 @@ lv_obj_t* createTopbarDroAxis(lv_obj_t* parent, char axis) {
   return label;
 }
 
+lv_obj_t* alarm_overlay = nullptr;
+lv_obj_t* alarm_reason_label = nullptr;
+lv_obj_t* alarm_hint_label = nullptr;
+
+// FluidNC alarms 4-5 (probe), 6-9 (homing) and 14 (unhomed) clear with $X;
+// anything else needs a Ctrl-X soft reset, which also drops work offsets.
+bool alarmNeedsReset(int code) {
+  switch (code) {
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+    case 14:
+      return false;
+    default:
+      return true;
+  }
+}
+
+void onUnlockAlarm(lv_event_t*) {
+  fluidnc.unlock();
+}
+
+void onSoftResetAlarm(lv_event_t*) {
+  fluidnc.softReset();
+}
+
+lv_obj_t* makeAlarmButton(lv_obj_t* parent, const char* text, lv_event_cb_t cb) {
+  lv_obj_t* button = lv_btn_create(parent);
+  lv_obj_add_style(button, &style_button, LV_PART_MAIN);
+  lv_obj_set_size(button, 132, 46);
+  lv_obj_add_event_cb(button, cb, LV_EVENT_CLICKED, nullptr);
+
+  lv_obj_t* label = lv_label_create(button);
+  lv_label_set_text(label, text);
+  lv_obj_set_style_text_font(label, &lv_font_montserrat_16, LV_PART_MAIN);
+  lv_obj_center(label);
+  return button;
+}
+
+void showAlarmOverlay() {
+  if (alarm_overlay) {
+    return;
+  }
+
+  alarm_overlay = lv_obj_create(lv_layer_top());
+  lv_obj_remove_style_all(alarm_overlay);
+  lv_obj_set_size(alarm_overlay, LV_PCT(100), LV_PCT(100));
+  lv_obj_set_style_bg_color(alarm_overlay, lv_color_hex(Colors::kBgDanger), LV_PART_MAIN);
+  lv_obj_set_style_bg_opa(alarm_overlay, LV_OPA_COVER, LV_PART_MAIN);
+  lv_obj_set_flex_flow(alarm_overlay, LV_FLEX_FLOW_COLUMN);
+  lv_obj_set_flex_align(alarm_overlay, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+  lv_obj_set_style_pad_all(alarm_overlay, 14, LV_PART_MAIN);
+  lv_obj_set_style_pad_row(alarm_overlay, 10, LV_PART_MAIN);
+  lv_obj_clear_flag(alarm_overlay, LV_OBJ_FLAG_SCROLLABLE);
+
+  lv_obj_t* title = lv_label_create(alarm_overlay);
+  lv_label_set_text(title, LV_SYMBOL_WARNING "  ALARM");
+  lv_obj_set_style_text_color(title, lv_color_hex(Colors::kTextPrimary), LV_PART_MAIN);
+  lv_obj_set_style_text_font(title, &lv_font_montserrat_32, LV_PART_MAIN);
+
+  alarm_reason_label = lv_label_create(alarm_overlay);
+  lv_label_set_long_mode(alarm_reason_label, LV_LABEL_LONG_WRAP);
+  lv_obj_set_width(alarm_reason_label, LV_PCT(92));
+  lv_obj_set_style_text_align(alarm_reason_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+  lv_obj_set_style_text_color(alarm_reason_label, lv_color_hex(Colors::kTextPrimary), LV_PART_MAIN);
+  lv_obj_set_style_text_font(alarm_reason_label, &lv_font_montserrat_16, LV_PART_MAIN);
+  lv_label_set_text(alarm_reason_label, "");
+
+  alarm_hint_label = lv_label_create(alarm_overlay);
+  lv_label_set_long_mode(alarm_hint_label, LV_LABEL_LONG_WRAP);
+  lv_obj_set_width(alarm_hint_label, LV_PCT(92));
+  lv_obj_set_style_text_align(alarm_hint_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+  lv_obj_set_style_text_color(alarm_hint_label, lv_color_hex(Colors::kTextTertiary), LV_PART_MAIN);
+  lv_obj_set_style_text_font(alarm_hint_label, &lv_font_montserrat_12, LV_PART_MAIN);
+  lv_label_set_text(alarm_hint_label, "");
+
+  lv_obj_t* row = lv_obj_create(alarm_overlay);
+  lv_obj_remove_style_all(row);
+  lv_obj_set_size(row, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+  lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
+  lv_obj_set_flex_align(row, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+  lv_obj_set_style_pad_column(row, 12, LV_PART_MAIN);
+  lv_obj_clear_flag(row, LV_OBJ_FLAG_SCROLLABLE);
+
+  makeAlarmButton(row, "Clear", onUnlockAlarm);
+  makeAlarmButton(row, "Soft Reset", onSoftResetAlarm);
+}
+
+void hideAlarmOverlay() {
+  if (!alarm_overlay) {
+    return;
+  }
+  lv_obj_del(alarm_overlay);
+  alarm_overlay = nullptr;
+  alarm_reason_label = nullptr;
+  alarm_hint_label = nullptr;
+}
+
+void updateAlarmOverlay() {
+  const bool alarmed = strncmp(latest_dro.state, "Alarm", 5) == 0;
+  if (!alarmed) {
+    hideAlarmOverlay();
+    return;
+  }
+
+  showAlarmOverlay();
+  if (alarm_reason_label) {
+    lv_label_set_text(alarm_reason_label, alarm_reason[0] ? alarm_reason : "Machine is in an alarm state");
+  }
+  if (alarm_hint_label) {
+    lv_label_set_text(alarm_hint_label,
+                      alarmNeedsReset(alarm_code) ? "This alarm needs a soft reset"
+                                                  : "Clear with $X, or soft reset");
+  }
+}
+
 }  // namespace
 
 void initShutdownControl() {
@@ -690,4 +810,5 @@ void applyDro() {
   }
 
   updateActionsJobStatus();
+  updateAlarmOverlay();
 }
