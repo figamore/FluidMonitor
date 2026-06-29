@@ -6,3 +6,4 @@
 #include <lvgl.h>
 
 void createActionsTab(lv_obj_t* tab);
+void updateActionsJobStatus();

@@ -5,9 +5,17 @@
 
 #include "../AppState.h"
 #include "../Colors.h"
+#include "JobControls.h"
 #include "Ui.h"
 
 namespace {
+
+lv_obj_t* status_panel = nullptr;
+lv_obj_t* status_job_controls = nullptr;
+lv_obj_t* status_job_progress_row = nullptr;
+lv_obj_t* status_job_progress = nullptr;
+lv_obj_t* status_job_track = nullptr;
+lv_obj_t* status_job_fill = nullptr;
 
 void styleSegment(lv_obj_t* segment, bool active) {
   if (!segment) {
@@ -62,6 +70,49 @@ void onStatusMachine(lv_event_t* event) {
   }
 }
 
+lv_obj_t* createStatusJobButton(lv_obj_t* parent, const char* text, lv_event_cb_t cb, uint32_t color) {
+  lv_obj_t* button = createSmallButton(parent, text, cb, nullptr);
+  lv_obj_set_size(button, 38, 30);
+  accentButton(button, lv_color_hex(color));
+  return button;
+}
+
+int clampPercent(int percent) {
+  if (percent < 0) {
+    return 0;
+  }
+  if (percent > 100) {
+    return 100;
+  }
+  return percent;
+}
+
+lv_obj_t* createProgressTrack(lv_obj_t* parent, int width, int height, lv_obj_t** fill) {
+  lv_obj_t* track = lv_obj_create(parent);
+  lv_obj_remove_style_all(track);
+  lv_obj_set_size(track, width, height);
+  lv_obj_set_style_bg_opa(track, LV_OPA_COVER, LV_PART_MAIN);
+  lv_obj_set_style_bg_color(track, lv_color_hex(Colors::kBgInactive), LV_PART_MAIN);
+  lv_obj_set_style_radius(track, height / 2, LV_PART_MAIN);
+  lv_obj_clear_flag(track, LV_OBJ_FLAG_SCROLLABLE);
+
+  *fill = lv_obj_create(track);
+  lv_obj_remove_style_all(*fill);
+  lv_obj_set_size(*fill, 0, LV_PCT(100));
+  lv_obj_align(*fill, LV_ALIGN_LEFT_MID, 0, 0);
+  lv_obj_set_style_bg_opa(*fill, LV_OPA_COVER, LV_PART_MAIN);
+  lv_obj_set_style_bg_color(*fill, lv_color_hex(Colors::kStatusSuccess), LV_PART_MAIN);
+  lv_obj_set_style_radius(*fill, height / 2, LV_PART_MAIN);
+  lv_obj_clear_flag(*fill, LV_OBJ_FLAG_SCROLLABLE);
+  return track;
+}
+
+void setProgress(lv_obj_t* fill, int percent) {
+  if (fill) {
+    lv_obj_set_width(fill, LV_PCT(clampPercent(percent)));
+  }
+}
+
 }  // namespace
 
 void updateStatusLabels() {
@@ -72,6 +123,48 @@ void updateStatusLabels() {
   formatAxis(status_x_label, "X", axes.x);
   formatAxis(status_y_label, "Y", axes.y);
   formatAxis(status_z_label, "Z", axes.z);
+}
+
+void updateStatusJobControls() {
+  const bool visible = machineJobControlsVisible();
+  if (status_job_controls) {
+    if (visible) {
+      lv_obj_clear_flag(status_job_controls, LV_OBJ_FLAG_HIDDEN);
+    } else {
+      lv_obj_add_flag(status_job_controls, LV_OBJ_FLAG_HIDDEN);
+    }
+  }
+  if (status_job_progress_row) {
+    if (visible) {
+      lv_obj_clear_flag(status_job_progress_row, LV_OBJ_FLAG_HIDDEN);
+    } else {
+      lv_obj_add_flag(status_job_progress_row, LV_OBJ_FLAG_HIDDEN);
+    }
+  }
+  if (status_job_progress) {
+    if (visible) {
+      lv_obj_clear_flag(status_job_progress, LV_OBJ_FLAG_HIDDEN);
+      lv_label_set_text_fmt(status_job_progress, "%d%%", activeJobPercent());
+    } else {
+      lv_obj_add_flag(status_job_progress, LV_OBJ_FLAG_HIDDEN);
+    }
+  }
+  if (status_job_track) {
+    if (visible) {
+      lv_obj_clear_flag(status_job_track, LV_OBJ_FLAG_HIDDEN);
+      setProgress(status_job_fill, activeJobPercent());
+    } else {
+      lv_obj_add_flag(status_job_track, LV_OBJ_FLAG_HIDDEN);
+    }
+  }
+
+  const lv_font_t* axis_font = visible ? &lv_font_montserrat_24 : &lv_font_montserrat_32;
+  lv_obj_set_style_text_font(status_x_label, axis_font, LV_PART_MAIN);
+  lv_obj_set_style_text_font(status_y_label, axis_font, LV_PART_MAIN);
+  lv_obj_set_style_text_font(status_z_label, axis_font, LV_PART_MAIN);
+  if (status_panel) {
+    lv_obj_set_style_pad_row(status_panel, visible ? 3 : 6, LV_PART_MAIN);
+  }
 }
 
 void createStatusTab(lv_obj_t* tab) {
@@ -98,25 +191,52 @@ void createStatusTab(lv_obj_t* tab) {
   coord_work_button = createSegment(modes, LV_SYMBOL_EDIT "\nWork", onStatusWork, false);
   coord_machine_button = createSegment(modes, LV_SYMBOL_GPS "\nMach", onStatusMachine, true);
 
-  lv_obj_t* panel = makePanel(tab);
-  lv_obj_set_size(panel, 210, LV_PCT(100));
-  lv_obj_set_flex_flow(panel, LV_FLEX_FLOW_COLUMN);
-  lv_obj_set_style_pad_left(panel, 14, LV_PART_MAIN);
-  lv_obj_set_style_pad_right(panel, 10, LV_PART_MAIN);
-  lv_obj_set_style_pad_top(panel, 8, LV_PART_MAIN);
-  lv_obj_set_style_pad_row(panel, 6, LV_PART_MAIN);
+  status_panel = makePanel(tab);
+  lv_obj_set_size(status_panel, 210, LV_PCT(100));
+  lv_obj_set_flex_flow(status_panel, LV_FLEX_FLOW_COLUMN);
+  lv_obj_set_style_pad_left(status_panel, 14, LV_PART_MAIN);
+  lv_obj_set_style_pad_right(status_panel, 10, LV_PART_MAIN);
+  lv_obj_set_style_pad_top(status_panel, 8, LV_PART_MAIN);
+  lv_obj_set_style_pad_row(status_panel, 6, LV_PART_MAIN);
 
-  status_x_label = lv_label_create(panel);
-  status_y_label = lv_label_create(panel);
-  status_z_label = lv_label_create(panel);
+  status_x_label = lv_label_create(status_panel);
+  status_y_label = lv_label_create(status_panel);
+  status_z_label = lv_label_create(status_panel);
   lv_obj_set_width(status_x_label, LV_PCT(100));
   lv_obj_set_width(status_y_label, LV_PCT(100));
   lv_obj_set_width(status_z_label, LV_PCT(100));
   lv_obj_set_style_text_font(status_x_label, &lv_font_montserrat_32, LV_PART_MAIN);
   lv_obj_set_style_text_font(status_y_label, &lv_font_montserrat_32, LV_PART_MAIN);
   lv_obj_set_style_text_font(status_z_label, &lv_font_montserrat_32, LV_PART_MAIN);
+
+  status_job_progress_row = lv_obj_create(status_panel);
+  lv_obj_remove_style_all(status_job_progress_row);
+  lv_obj_set_size(status_job_progress_row, LV_PCT(100), 16);
+  lv_obj_set_flex_flow(status_job_progress_row, LV_FLEX_FLOW_ROW);
+  lv_obj_set_flex_align(status_job_progress_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+  lv_obj_clear_flag(status_job_progress_row, LV_OBJ_FLAG_SCROLLABLE);
+
+  status_job_track = createProgressTrack(status_job_progress_row, 122, 8, &status_job_fill);
+
+  status_job_progress = lv_label_create(status_job_progress_row);
+  lv_obj_set_width(status_job_progress, 44);
+  lv_obj_set_style_text_font(status_job_progress, &lv_font_montserrat_12, LV_PART_MAIN);
+  lv_obj_set_style_text_color(status_job_progress, lv_color_hex(Colors::kTextSecondary), LV_PART_MAIN);
+
+  status_job_controls = lv_obj_create(status_panel);
+  lv_obj_remove_style_all(status_job_controls);
+  lv_obj_set_size(status_job_controls, LV_PCT(100), 32);
+  lv_obj_set_flex_flow(status_job_controls, LV_FLEX_FLOW_ROW);
+  lv_obj_set_flex_align(status_job_controls, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+  lv_obj_clear_flag(status_job_controls, LV_OBJ_FLAG_SCROLLABLE);
+  createStatusJobButton(status_job_controls, LV_SYMBOL_PAUSE, onJobPause, Colors::kStatusWarning);
+  createStatusJobButton(status_job_controls, LV_SYMBOL_PLAY, onJobResume, Colors::kStatusSuccess);
+  createStatusJobButton(status_job_controls, LV_SYMBOL_STOP, onJobAbort, Colors::kStatusError);
+  createStatusJobButton(status_job_controls, LV_SYMBOL_WARNING, onJobEStop, Colors::kStatusDanger);
+
   formatAxis(status_x_label, "X", 0);
   formatAxis(status_y_label, "Y", 0);
   formatAxis(status_z_label, "Z", 0);
+  updateStatusJobControls();
   selectStatusMode(false);
 }

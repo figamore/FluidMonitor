@@ -28,7 +28,9 @@ lv_obj_t* pairing_success_panel = nullptr;
 lv_obj_t* jog_step_buttons[4] = {};
 
 DroStatus latest_dro = {};
+JobState job_state = {};
 volatile bool pending_dro = false;
+volatile bool pending_job_ui = false;
 bool suppress_touch_until_release = false;
 uint8_t selected_jog_step = 1;
 bool jog_active = false;

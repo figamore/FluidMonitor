@@ -7,3 +7,4 @@
 
 void createStatusTab(lv_obj_t* tab);
 void updateStatusLabels();
+void updateStatusJobControls();

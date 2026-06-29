@@ -24,6 +24,26 @@ struct DroStatus {
   AxisTriplet wco;
   bool inch = false;
   char state[16] = {};
+  char file_name[64] = {};
+  int file_percent = -1;
+  bool file_active = false;
+};
+
+struct JobState {
+  char path[96] = "/sd";
+  char selected[FluidNCFileInfo::kNameSize] = {};
+  bool selected_is_dir = false;
+  const FluidNCFileInfo* files = nullptr;
+  size_t file_count = 0;
+  bool file_truncated = false;
+  bool list_loading = false;
+  bool list_error = false;
+  char list_message[64] = {};
+  char active_name[64] = {};
+  int active_percent = -1;
+  bool active = false;
+  bool paused = false;
+  bool initiated_here = false;
 };
 
 extern FluidNCEspNowClient fluidnc;
@@ -51,7 +71,9 @@ extern lv_obj_t* pairing_success_panel;
 extern lv_obj_t* jog_step_buttons[4];
 
 extern DroStatus latest_dro;
+extern JobState job_state;
 extern volatile bool pending_dro;
+extern volatile bool pending_job_ui;
 extern bool suppress_touch_until_release;
 extern uint8_t selected_jog_step;
 extern bool jog_active;

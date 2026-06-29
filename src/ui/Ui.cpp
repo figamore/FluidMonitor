@@ -670,16 +670,24 @@ void createUi() {
 }
 
 void applyDro() {
-  if (!pending_dro) {
+  const bool apply_dro = pending_dro;
+  const bool apply_job_ui = pending_job_ui;
+  if (!apply_dro && !apply_job_ui) {
     return;
   }
-  pending_dro = false;
 
-  char stateText[32];
-  snprintf(stateText, sizeof(stateText), "%.11s", latest_dro.state[0] ? latest_dro.state : "Disconnected");
-  lv_label_set_text(state_label, stateText);
-  updateStatusLabels();
-  updateTopbarDro();
-  lv_label_set_text(units_label, latest_dro.inch ? "Units: in" : "Units: mm");
-  setStatus(lv_color_hex(0x34D399));
+  if (apply_dro) {
+    pending_dro = false;
+
+    char stateText[32];
+    snprintf(stateText, sizeof(stateText), "%.11s", latest_dro.state[0] ? latest_dro.state : "Disconnected");
+    lv_label_set_text(state_label, stateText);
+    updateStatusLabels();
+    updateStatusJobControls();
+    updateTopbarDro();
+    lv_label_set_text(units_label, latest_dro.inch ? "Units: in" : "Units: mm");
+    setStatus(lv_color_hex(0x34D399));
+  }
+
+  updateActionsJobStatus();
 }
