@@ -5,16 +5,15 @@ FluidMonitor is a simple FluidNC DRO monitor and controller that runs on CYD-sty
 ## Build
 
 ```sh
-pio run -e esp32-cyd-capacitive
+pio run -e esp32-cyd
 ```
+
+The firmware supports most capacitive and resistive CYD boards - but capacitive boards are largely preferred.
 
 ## Pairing
 
-Open an ESP-NOW pairing window in FluidNC, then open the **Settings** tab in the
-app and tap **Pair**. Once paired, the app stores the machine profile and
-reconnects automatically.
+Open an ESP-NOW pairing window in FluidNC, then open the **Settings** tab in the app and tap **Pair**. Once paired, the app stores the machine profile and reconnects automatically.
 
 ## License
 
-FluidMonitor is licensed under the GNU General Public License v3.0 only. See
-[`LICENSE`](LICENSE).
+FluidMonitor is licensed under the GNU General Public License v3.0. See [`LICENSE`](LICENSE).
